@@ -95,7 +95,7 @@ function setup(){
  $('start').onclick=()=>{const name=$('soloName').value.trim();if(!name)return toast('Bitte einen Spielernamen eingeben.');if(name.length>26)return toast('Name zu lang.');
  state.names=[name];state.count=1;state.subject=$('subject').value;getProfile(name);
  state.scores=[0];state.streaks=[0];state.round=0;state.turn=0;state.selection=[];state.answered=false;state.celebrate=-1;state.order=buildOrder();game()};
- $('profiles').onclick=profileList;$('shop').onclick=shopMenu;
+ $('online').onclick=onlineMenu; $('profiles').onclick=profileList;$('shop').onclick=shopMenu;
  $('export').onclick=exportBackup;
  $('import').onclick=()=>$('backupFile').click();
  $('backupFile').onchange=e=>{if(e.target.files[0])importBackup(e.target.files[0])};
