@@ -44,6 +44,7 @@ input,select{min-height:54px;font-size:16px;padding:13px}
 @media(prefers-reduced-motion:reduce){
  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
+[hidden]{display:none!important}
 /* MEGAPOWER SECURITY COMMAND CENTER */
 :root{--bg:#07100f;--panel:#11241f;--line:#315d4a;--cyan:#8bffad;--gold:#f6d66b}
 body{background:radial-gradient(ellipse at 50% -20%,#214c3a 0%,#0b1c19 40%,#050e11 100%);background-attachment:fixed}
@@ -100,7 +101,7 @@ function onlineMenu(){
 let hubToken=null,hubTimer=null,hubBusy=false,hubState=null;
 function hubStop(){if(hubTimer)clearInterval(hubTimer);hubTimer=null}
 async function hubOpen(name){
- hubStop();mpStop();state.stage='hub';$('roster').hidden=true;const p=getProfile(name);
+ localStorage.setItem('mp_last_character',name);hubStop();mpStop();state.stage='hub';$('roster').hidden=true;const p=getProfile(name);
  $('app').innerHTML='<section class="panel"><h2>🌍 Verbinde mit der gemeinsamen Lobby …</h2></section>';
  try{const stored=JSON.parse(localStorage.getItem('mp_hub_session')||'null');const joined=await mpRpc('mp_hub_join',{p_name:name,p_avatar:mpAvatar(p),p_token:stored?.name===name?stored.token:null});hubToken=joined.token;localStorage.setItem('mp_hub_session',JSON.stringify({name,token:hubToken}));await hubRefresh();hubTimer=setInterval(()=>{if(state.stage==='hub'&&document.visibilityState==='visible')hubRefresh()},3500)}
  catch(e){$('app').innerHTML='<section class="panel"><h2>Verbindung fehlgeschlagen</h2><p>'+esc(e.message)+'</p><button id="retryHub">Erneut versuchen</button></section>';$('retryHub').onclick=()=>hubOpen(name)}
@@ -278,5 +279,5 @@ function result(){
  <div class="row" style="justify-content:center"><button id="again">🔁 Noch eine Runde</button><button id="profiles" class="ghost">🎨 Charakter</button><button id="shop" class="ghost">🛍️ Shop</button></div></section>`;
  $('again').onclick=setup;$('profiles').onclick=profileList;$('shop').onclick=shopMenu;
 }
-window.addEventListener('storage',e=>{if(e.key===KEY){try{profiles=JSON.parse(e.newValue||'{}')}catch(_){}}});onlineMenu();
+window.addEventListener('storage',e=>{if(e.key===KEY){try{profiles=JSON.parse(e.newValue||'{}')}catch(_){}}});const lastChar=localStorage.getItem('mp_last_character');if(lastChar&&profiles[lastChar]){state.names=[lastChar];hubOpen(lastChar)}else onlineMenu();
 </script></body></html>
