@@ -90,11 +90,11 @@ function hubRender(){
  let h='<section class="panel"><div class="row between"><h2>🌍 MEGAPOWER – Gemeinsame Lobby</h2><span style="color:#2ce0c3">● Online</span></div><p>Hier treffen sich automatisch alle Spieler, die MEGAPOWER betreten. Kein Raumcode nötig.</p><div class="row">'+avatar(p,true)+plate(p)+profileStats(p)+'</div><h3>👥 Spieler in der Lobby ('+hubState.players.length+')</h3><div class="grid">'+hubState.players.map(x=>{const v={...newProfile(x.name),...(x.avatar||{}),name:x.name};return '<div class="playercard"><div class="row">'+avatar(v,true)+plate(v)+'</div></div>'}).join('')+'</div><h3>🏆 Gemeinsam spielen</h3><div class="row"><button id="hubCreate">🎮 Multiplayer-Runde eröffnen</button></div>';
  if(hubState.rooms.length)h+='<p>Offene Runden – einfach beitreten:</p>'+hubState.rooms.map(r=>'<div class="row" style="margin:9px 0"><strong>Raum '+esc(r.code)+' · '+r.count+'/12</strong><button class="ghost" data-hub-join="'+esc(r.code)+'">Beitreten</button></div>').join('');
  else h+='<p class="muted">Noch keine Runde offen. Eröffne die erste!</p>';
- h+='<div class="panel"><h3>🎯 Einzelspieler</h3><p>Du möchtest alleine üben?</p><button class="ghost" id="hubSolo">▶ Alleine 10 Fragen lernen</button></div><div class="row"><button class="ghost" id="hubEdit">🎨 Charakter bearbeiten</button><button class="ghost" id="hubShop">🛍️ Shop</button></div></section>';
+ h+='<div class="panel"><h3>🎯 Einzelspieler</h3><button class="ghost tiny" id="hubSolo">▶ Einzelspieler</button></div><div class="row"><button class="ghost" id="hubEdit">🎨 Charakter bearbeiten</button><button class="ghost" id="hubShop">🛍️ Shop</button></div></section>';
  $('app').innerHTML=h;
  $('hubCreate').onclick=()=>hubStartRoom('mp_create',name);
  document.querySelectorAll('[data-hub-join]').forEach(b=>b.onclick=()=>hubStartRoom('mp_join',name,b.dataset.hubJoin));
- $('hubSolo').onclick=()=>{hubStop();setup()};
+ $('hubSolo').onclick=()=>{hubStop();soloSetup()};
  $('hubEdit').onclick=()=>{hubStop();editor(name,()=>hubOpen(name))};
  $('hubShop').onclick=()=>{hubStop();shop(name,()=>hubOpen(name))}
 }
@@ -151,15 +151,15 @@ function mpRender(){
  if($('mpAgain'))$('mpAgain').onclick=()=>{mp=null;localStorage.removeItem('mp_integrated_session');mpLobby(name)}
 }
 
-function setup(){
- state.stage='setup';$('roster').hidden=true;
+function soloSetup(){
+ state.stage='solo-setup';$('roster').hidden=true;
  const names=Object.keys(profiles);
- $('app').innerHTML=`<section class="panel"><h2>⚡ 34a MEGAPOWER – Multiplayer & Lernen</h2>
+ $('app').innerHTML=`<section class="panel"><h2>🎯 Einzelspieler – Übungsmodus</h2><p><button id="soloBack" class="ghost tiny">← Zurück zur Multiplayer-Lobby</button></p>
  <p class="muted">487 Lernfragen · 6 Themen · echter Online-Multiplayer · kein Echtgeld.</p>
  <div class="grid"><div><label>Dein Charakter</label><select id="existing"><option value="">Neuen Namen eingeben</option>${names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('')}</select>
  <input id="soloName" maxlength="26" placeholder="Dein Spielername" style="margin-top:8px" value="${esc(state.names[0]||'')}"></div>
  <div><label>Lernthema</label><select id="subject">${TOPICS.map(([id,t])=>`<option value="${id}" ${state.subject===id?'selected':''}>${esc(t)}</option>`).join('')}</select></div></div>
- <div class="row" style="margin-top:16px"><button id="online" style="background:linear-gradient(135deg,#ffd46b,#ff9f6e)">🌍 Zur gemeinsamen Lobby</button><button id="start">▶ Einzelspieler: 10 Fragen starten</button><button class="ghost" id="profiles">🎨 Charaktere</button><button class="ghost" id="shop">🛍️ Shop</button></div>
+ <div class="row" style="margin-top:16px"><button id="start">▶ 10 Fragen alleine üben</button><button class="ghost" id="profiles">🎨 Charaktere</button><button class="ghost" id="shop">🛍️ Shop</button></div>
  <p class="hint">Richtige Antwort: +5 Coins und +5 EP, mit Serienbonus. 50 Level. Dein Fortschritt wird nur in diesem Browser gespeichert.</p></section>
  <section class="panel"><h2>💾 Spielstand sichern</h2><p>Für einen anderen PC oder Browser kannst du deinen Spielstand als Datei exportieren und dort wieder importieren.</p>
  <div class="row"><button class="ghost" id="export">⬇ Spielstand exportieren</button><button class="ghost" id="import">⬆ Spielstand importieren</button><input id="backupFile" type="file" accept=".json,application/json" style="display:none"></div>
@@ -168,11 +168,12 @@ function setup(){
  $('start').onclick=()=>{const name=$('soloName').value.trim();if(!name)return toast('Bitte einen Spielernamen eingeben.');if(name.length>26)return toast('Name zu lang.');
  state.names=[name];state.count=1;state.subject=$('subject').value;getProfile(name);
  state.scores=[0];state.streaks=[0];state.round=0;state.turn=0;state.selection=[];state.answered=false;state.celebrate=-1;state.order=buildOrder();game()};
- $('online').onclick=onlineMenu; $('profiles').onclick=profileList;$('shop').onclick=shopMenu;
+ $('soloBack').onclick=setup; $('profiles').onclick=profileList;$('shop').onclick=shopMenu;
  $('export').onclick=exportBackup;
  $('import').onclick=()=>$('backupFile').click();
  $('backupFile').onchange=e=>{if(e.target.files[0])importBackup(e.target.files[0])};
 }
+function setup(){if(state.names[0])hubOpen(state.names[0]);else onlineMenu()}
 function exportBackup(){
  const blob=new Blob([JSON.stringify({format:'34a-megapower-offline',version:1,profiles},null,2)],{type:'application/json'});
  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='34a-megapower-spielstand.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
