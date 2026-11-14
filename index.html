@@ -64,16 +64,45 @@ function profileStats(p){return `<div class="stats">⭐ Level ${level(p)} / 50 �
 function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function prepared(q){const ids=shuffle(q.options.map((_,i)=>i));const keys=Array.isArray(q.correct)?q.correct:[q.correct];return {...q,options:ids.map(i=>q.options[i]),correct:keys.map(i=>ids.indexOf(i)).sort((a,b)=>a-b)}}
 function buildOrder(){const out=[];const used=new Set();for(let r=1;r<=10;r++){let pool=shuffle(QUESTIONS.filter(q=>(state.subject==='mix'||q.source===state.subject)&&!used.has(q.q)&&q.difficulty===r));if(pool.length<state.count){pool=shuffle(QUESTIONS.filter(q=>(state.subject==='mix'||q.source===state.subject)&&!used.has(q.q)&&Math.abs(q.difficulty-r)<=3))}if(pool.length<state.count){pool=shuffle(QUESTIONS.filter(q=>(state.subject==='mix'||q.source===state.subject)&&!used.has(q.q)))}if(pool.length<state.count)throw Error('Zu wenige Fragen.');for(const q of pool.slice(0,state.count)){used.add(q.q);out.push(prepared(q))}}return out}
-function onlineMenu(){
- state.stage='online';$('roster').hidden=true;
- const names=Object.keys(profiles);const selected=state.names[0]||names[0]||'';
- $('app').innerHTML=`<section class="panel"><div class="row between"><h2>🏆 MEGAPOWER Online-Multiplayer</h2><button class="ghost" id="back">← Zurück</button></div><p>Dein originaler Charakter begleitet dich in den Online-Raum. Alle 487 Fragen bleiben dabei dieselben.</p><label>Wähle deinen Charakter</label><select id="onlineName"><option value="">Neuen Charakter anlegen</option>${names.map(n=>`<option value="${esc(n)}" ${n===selected?'selected':''}>${esc(n)}</option>`).join('')}</select><input id="onlineNew" maxlength="24" placeholder="Oder neuen Namen eingeben" style="margin-top:8px"><div id="onlineAvatar" style="text-align:center;margin:16px"></div><div class="row"><button id="enterOnline">🚀 Online-Raum betreten</button><button id="onlineShop" class="ghost">🛍️ Avatar-Shop</button></div><p class="muted">Bis zu 12 Spieler · eigener Raumcode · Live-Rangliste. Der Fortschritt bleibt auf diesem Gerät gespeichert.</p></section>`;
- const preview=()=>{const n=$('onlineNew').value.trim()||$('onlineName').value;const p=n?(profiles[n]||newProfile(n)):null;$('onlineAvatar').innerHTML=p?avatar(p)+plate(p)+profileStats(p):'<p>Wähle einen Charakter.</p>'};
- $('onlineName').onchange=preview;$('onlineNew').oninput=preview;preview();
- $('back').onclick=setup;$('onlineShop').onclick=shopMenu;
- $('enterOnline').onclick=()=>{const n=($('onlineNew').value.trim()||$('onlineName').value).slice(0,24);if(!n){toast('Bitte einen Spielernamen wählen.');return}getProfile(n);state.names=[n];onlineRoom(n)};
-}
 
+function onlineMenu(){
+ state.stage='character';$('roster').hidden=true;const names=Object.keys(profiles),chosen=state.names[0]||names[0]||'';
+ $('app').innerHTML='<section class="panel"><h2>🎨 Schritt 1: Deinen Charakter erstellen</h2><p>Wähle deinen Charakter, gestalte ihn und gib ihm einen Namen. Danach geht es direkt in die gemeinsame Lobby.</p><label>Vorhandener Charakter</label><select id="onlineName"><option value="">Neuer Charakter</option>'+names.map(n=>'<option value="'+esc(n)+'" '+(n===chosen?'selected':'')+'>'+esc(n)+'</option>').join('')+'</select><label>Dein Name</label><input id="onlineNew" maxlength="24" placeholder="Spielername" style="margin-top:8px"><div id="onlineAvatar" style="text-align:center;margin:16px"></div><div class="row"><button id="onlineEdit">🎨 Charakter gestalten</button><button id="enterOnline">➡ Weiter zur Lobby</button></div><p class="muted">Danach triffst du automatisch alle anderen Online-Spieler.</p></section>';
+ const name=()=>($('onlineNew').value.trim()||$('onlineName').value).slice(0,24);
+ const preview=()=>{const n=name(),p=n?(profiles[n]||newProfile(n)):null;$('onlineAvatar').innerHTML=p?avatar(p)+plate(p)+profileStats(p):'<p>Gib deinem Charakter einen Namen.</p>'};
+ $('onlineName').onchange=preview;$('onlineNew').oninput=preview;preview();
+ $('onlineEdit').onclick=()=>{const n=name();if(!n)return toast('Bitte zuerst Namen eingeben');getProfile(n);state.names=[n];editor(n,onlineMenu)};
+ $('enterOnline').onclick=()=>{const n=name();if(!n)return toast('Bitte Namen eingeben');getProfile(n);state.names=[n];hubOpen(n)}
+}
+let hubToken=null,hubTimer=null,hubBusy=false,hubState=null;
+function hubStop(){if(hubTimer)clearInterval(hubTimer);hubTimer=null}
+async function hubOpen(name){
+ hubStop();mpStop();state.stage='hub';$('roster').hidden=true;const p=getProfile(name);
+ $('app').innerHTML='<section class="panel"><h2>🌍 Verbinde mit der gemeinsamen Lobby …</h2></section>';
+ try{const stored=JSON.parse(localStorage.getItem('mp_hub_session')||'null');const joined=await mpRpc('mp_hub_join',{p_name:name,p_avatar:mpAvatar(p),p_token:stored?.name===name?stored.token:null});hubToken=joined.token;localStorage.setItem('mp_hub_session',JSON.stringify({name,token:hubToken}));await hubRefresh();hubTimer=setInterval(()=>{if(state.stage==='hub'&&document.visibilityState==='visible')hubRefresh()},3500)}
+ catch(e){$('app').innerHTML='<section class="panel"><h2>Verbindung fehlgeschlagen</h2><p>'+esc(e.message)+'</p><button id="retryHub">Erneut versuchen</button></section>';$('retryHub').onclick=()=>hubOpen(name)}
+}
+async function hubRefresh(){
+ if(!hubToken||hubBusy||state.stage!=='hub')return;hubBusy=true;try{hubState=await mpRpc('mp_hub_state',{p_token:hubToken});hubRender()}catch(e){toast(e.message)}finally{hubBusy=false}
+}
+function hubRender(){
+ if(state.stage!=='hub'||!hubState)return;const name=state.names[0],p=getProfile(name);
+ let h='<section class="panel"><div class="row between"><h2>🌍 MEGAPOWER – Gemeinsame Lobby</h2><span style="color:#2ce0c3">● Online</span></div><p>Hier treffen sich automatisch alle Spieler, die MEGAPOWER betreten. Kein Raumcode nötig.</p><div class="row">'+avatar(p,true)+plate(p)+profileStats(p)+'</div><h3>👥 Spieler in der Lobby ('+hubState.players.length+')</h3><div class="grid">'+hubState.players.map(x=>{const v={...newProfile(x.name),...(x.avatar||{}),name:x.name};return '<div class="playercard"><div class="row">'+avatar(v,true)+plate(v)+'</div></div>'}).join('')+'</div><h3>🏆 Gemeinsam spielen</h3><div class="row"><button id="hubCreate">🎮 Multiplayer-Runde eröffnen</button></div>';
+ if(hubState.rooms.length)h+='<p>Offene Runden – einfach beitreten:</p>'+hubState.rooms.map(r=>'<div class="row" style="margin:9px 0"><strong>Raum '+esc(r.code)+' · '+r.count+'/12</strong><button class="ghost" data-hub-join="'+esc(r.code)+'">Beitreten</button></div>').join('');
+ else h+='<p class="muted">Noch keine Runde offen. Eröffne die erste!</p>';
+ h+='<div class="panel"><h3>🎯 Einzelspieler</h3><p>Du möchtest alleine üben?</p><button class="ghost" id="hubSolo">▶ Alleine 10 Fragen lernen</button></div><div class="row"><button class="ghost" id="hubEdit">🎨 Charakter bearbeiten</button><button class="ghost" id="hubShop">🛍️ Shop</button></div></section>';
+ $('app').innerHTML=h;
+ $('hubCreate').onclick=()=>hubStartRoom('mp_create',name);
+ document.querySelectorAll('[data-hub-join]').forEach(b=>b.onclick=()=>hubStartRoom('mp_join',name,b.dataset.hubJoin));
+ $('hubSolo').onclick=()=>{hubStop();setup()};
+ $('hubEdit').onclick=()=>{hubStop();editor(name,()=>hubOpen(name))};
+ $('hubShop').onclick=()=>{hubStop();shop(name,()=>hubOpen(name))}
+}
+async function hubStartRoom(fn,name,code){
+ hubStop();state.stage='hub-loading';$('app').innerHTML='<section class="panel"><h2>🎮 Betrete gemeinsame Spielrunde …</h2></section>';
+ try{mp={...(await mpRpc(fn,fn==='mp_create'?{p_name:name}:{p_name:name,p_code:code})),name};localStorage.setItem('mp_integrated_session',JSON.stringify(mp));await mpRpc('mp_set_avatar',{p_code:mp.code,p_token:mp.token,p_avatar:mpAvatar(getProfile(name))});await mpRpc('mp_hub_room',{p_token:hubToken,p_code:mp.code});state.stage='online-room';mpRound=-2;mpSelected=-1;await mpRefresh();mpTimer=setInterval(()=>{if(mp&&state.stage==='online-room'&&document.visibilityState==='visible')mpRefresh()},1800)}
+ catch(e){toast(e.message);hubOpen(name)}
+}
 const MP_API='https://smqeuxsqkmqlpgtbmhre.supabase.co/rest/v1/rpc/',MP_KEY='sb_publishable_-2mJB_-wPHPGbjNJxnkpAg_CKOHbu9J';
 let mp=null,mpState=null,mpSelected=-1,mpRound=-2,mpTimer=null,mpBusy=false;
 async function mpRpc(fn,data){const r=await fetch(MP_API+fn,{method:'POST',headers:{apikey:MP_KEY,'Content-Type':'application/json'},body:JSON.stringify(data)});const v=await r.json();if(!r.ok)throw Error(v.message||'Verbindung fehlgeschlagen');return v}
@@ -130,7 +159,7 @@ function setup(){
  <div class="grid"><div><label>Dein Charakter</label><select id="existing"><option value="">Neuen Namen eingeben</option>${names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('')}</select>
  <input id="soloName" maxlength="26" placeholder="Dein Spielername" style="margin-top:8px" value="${esc(state.names[0]||'')}"></div>
  <div><label>Lernthema</label><select id="subject">${TOPICS.map(([id,t])=>`<option value="${id}" ${state.subject===id?'selected':''}>${esc(t)}</option>`).join('')}</select></div></div>
- <div class="row" style="margin-top:16px"><button id="online" style="background:linear-gradient(135deg,#ffd46b,#ff9f6e)">🏆 Gemeinsam online spielen</button><button id="start">▶ Einzelspieler: 10 Fragen starten</button><button class="ghost" id="profiles">🎨 Charaktere</button><button class="ghost" id="shop">🛍️ Shop</button></div>
+ <div class="row" style="margin-top:16px"><button id="online" style="background:linear-gradient(135deg,#ffd46b,#ff9f6e)">🌍 Zur gemeinsamen Lobby</button><button id="start">▶ Einzelspieler: 10 Fragen starten</button><button class="ghost" id="profiles">🎨 Charaktere</button><button class="ghost" id="shop">🛍️ Shop</button></div>
  <p class="hint">Richtige Antwort: +5 Coins und +5 EP, mit Serienbonus. 50 Level. Dein Fortschritt wird nur in diesem Browser gespeichert.</p></section>
  <section class="panel"><h2>💾 Spielstand sichern</h2><p>Für einen anderen PC oder Browser kannst du deinen Spielstand als Datei exportieren und dort wieder importieren.</p>
  <div class="row"><button class="ghost" id="export">⬇ Spielstand exportieren</button><button class="ghost" id="import">⬆ Spielstand importieren</button><input id="backupFile" type="file" accept=".json,application/json" style="display:none"></div>
@@ -219,5 +248,5 @@ function result(){
  <div class="row" style="justify-content:center"><button id="again">🔁 Noch eine Runde</button><button id="profiles" class="ghost">🎨 Charakter</button><button id="shop" class="ghost">🛍️ Shop</button></div></section>`;
  $('again').onclick=setup;$('profiles').onclick=profileList;$('shop').onclick=shopMenu;
 }
-window.addEventListener('storage',e=>{if(e.key===KEY){try{profiles=JSON.parse(e.newValue||'{}')}catch(_){}}});setup();
+window.addEventListener('storage',e=>{if(e.key===KEY){try{profiles=JSON.parse(e.newValue||'{}')}catch(_){}}});onlineMenu();
 </script></body></html>
