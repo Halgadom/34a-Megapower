@@ -172,6 +172,27 @@ function shop(){stop();screen='shop';const p=profile(name);const render=()=>{let
 async function openHub(){stop();screen='hub';if(!name)return create();await loadNameSave(name);frame('<div class="panel"><h2>🌍 Verbindung zur Sicherheitszentrale …</h2></div>');try{const old=JSON.parse(sessionStorage.getItem('dragon34_hub_tab_v1')||'null'),r=await rpc('mp_hub_join',{p_name:name,p_avatar:avatarData(profile(name)),p_token:old?.name===name?old.token:null});hubToken=r.token;sessionStorage.setItem('dragon34_hub_tab_v1',JSON.stringify({name,token:hubToken}));await claimOnlineChests();await claimOnlineCoins();await hubRefresh();timer=setInterval(()=>{if(screen==='hub')hubRefresh()},3500)}catch(e){frame('<div class="panel"><h2>Verbindung fehlgeschlagen</h2><p class="error">'+esc(e.message)+'</p><button id="retry">Erneut versuchen</button></div>');$('retry').onclick=openHub}}
 async function claimOnlineChests(){if(!hubToken||!name)return;try{const count=Number(await rpc('mp_claim_chests',{p_token:hubToken}))||0;if(count>0){const p=profile(name);p.dragonChests=(Number(p.dragonChests)||0)+count;save();await rpc('mp_store_name_save',{p_name:name,p_profile:p});alert('🎁 Du hast '+count+' Drachen-Lootkisten geschenkt bekommen! Öffne dein Drachen-Inventar.')}}catch(e){console.warn('Lootkisten-Abholung:',e.message)}}
 async function claimOnlineCoins(){if(!hubToken||!name)return;try{const gift=await rpc('mp_claim_coins',{p_token:hubToken});const coins=Number(gift?.coins)||0,boss=Number(gift?.bossCoins)||0;if(coins>0||boss>0){const p=profile(name);p.coins=(Number(p.coins)||0)+coins;p.bossCoins=(Number(p.bossCoins)||0)+boss;save();await rpc('mp_store_name_save',{p_name:name,p_profile:p});alert('🎁 Mario hat dir '+[coins?coins+' Dragon34coins':'',boss?boss+' Bossmünzen':''].filter(Boolean).join(' und ')+' geschickt!')}}catch(e){console.warn('Münzgeschenk-Abholung:',e.message)}}
+let giftPollingBusy=false;
+async function checkLiveGifts(){
+ if(giftPollingBusy||!name||nameLoading||document.hidden)return;
+ giftPollingBusy=true;
+ try{
+  const currentName=name;
+  const old=JSON.parse(sessionStorage.getItem('dragon34_hub_tab_v1')||'null');
+  if(!hubToken||old?.name!==currentName){
+   const joined=await rpc('mp_hub_join',{p_name:currentName,p_avatar:avatarData(profile(currentName)),p_token:old?.name===currentName?old.token:null});
+   if(name!==currentName)return;
+   hubToken=joined.token;
+   sessionStorage.setItem('dragon34_hub_tab_v1',JSON.stringify({name:currentName,token:hubToken}));
+  }
+  if(name!==currentName)return;
+  await claimOnlineChests();
+  if(name===currentName)await claimOnlineCoins();
+ }catch(e){console.warn('Geschenk-Sofortabholung:',e.message)}
+ finally{giftPollingBusy=false}
+}
+setInterval(checkLiveGifts,4000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkLiveGifts()});
 async function hubRefresh(){if(busy||screen!=='hub')return;busy=true;try{hub=await rpc('mp_hub_state',{p_token:hubToken});await claimOnlineChests();await claimOnlineCoins();if(Array.isArray(hub.players)){const seen=new Set();hub.players=hub.players.filter(player=>{const key=String(player.name||'').trim().toLocaleLowerCase('de-DE');if(!key||seen.has(key))return false;seen.add(key);return true})}hubRender()}catch(e){console.warn(e.message)}finally{busy=false}}
 const JOURNEY_BOSSES=[{name:'Glutdrache Ignar',icon:'🔥🐉',reward:40},{name:'Frostwyrm Glacius',icon:'❄️🐉',reward:50},{name:'Schattenfürst Noctis',icon:'🌑🐉',reward:60},{name:'Gewitterdrache Voltar',icon:'⚡🐉',reward:75},{name:'Goldener Urdrache',icon:'👑🐉',reward:100}];let journeyRun=null;
 
