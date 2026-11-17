@@ -34,3 +34,5 @@ test('Castle towers have architectural layers and trees have buttress roots',()=
 test('Castle gate has an open passage and furnished courtyard',()=>{for(const token of ['if(i!==3&&i!==4)','const castleGate=new TH.Group()','const castleCourtyard=new TH.Group()','cyl(castleCourtyard,M.water','box(castleGate,M.stone2,0,10.8'])assert.ok(js.includes(token),token)});
 
 test('Five castle courtyard upgrades are present',()=>{for(const token of ['const smithy=new TH.Group()','const market=new TH.Group()','const tavern=new TH.Group()','const signWood=mat','const courtyardLanterns=new TH.Group()'])assert.ok(js.includes(token),token)});
+
+test('Castle NPC services and persistent guard quest are wired',()=>{for(const token of ["name:'Burgschmied Rurik'","name:'Marktfrau Selma'","name:'Wirtin Mira'","name:'Burgwache Leona'","if(nearest.type==='tavern')","if(type==='tavern')","if(type==='castleQuest')","state.quests.castleWatch=true"])assert.ok(js.includes(token),token)});
