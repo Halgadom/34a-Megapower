@@ -240,6 +240,47 @@ box(castleCourtyard,M.wood,side*21,.55,-92,3,.8,.25);
 cyl(castleCourtyard,M.stone2,0,.7,-90,2.2,1.4);
 cyl(castleCourtyard,M.water,0,1.43,-90,1.85,.08);
 cyl(castleCourtyard,M.stone,0,2.1,-90,.22,1.6);
+
+// Fünf ausbaubare Burghof-Stationen. Der Mittelweg bleibt frei.
+const smithy=new TH.Group();smithy.position.set(-18,0,-84);castleCourtyard.add(smithy);
+const forgeStone=mat('#575553',.06,.96),forgeEmber=new TH.MeshStandardMaterial({color:'#f3a04b',emissive:'#d45519',emissiveIntensity:1.4});
+box(smithy,forgeStone,0,.8,0,5,1.6,3.6);
+box(smithy,forgeStone,0,2.1,-1.1,4.8,1.4,.8);
+box(smithy,forgeEmber,0,1.67,.65,2.8,.16,1.7);
+for(const x of [-1.6,1.6])cyl(smithy,M.wood,x,1.8,2.4,.2,3.6);
+const anvil=mesh(smithy,new TH.CylinderGeometry(.68,.42,.75,6),M.iron,4,.95,0);
+box(smithy,M.iron,4,1.48,0,1.9,.35,.7);
+const forgeLight=new TH.PointLight('#ff9b54',2.2,12);forgeLight.position.set(0,2.2,.5);smithy.add(forgeLight);
+// Markt: getrennte Stände mit Stoffdächern und sichtbaren Waren.
+const market=new TH.Group();market.position.set(17,0,-84);castleCourtyard.add(market);
+const marketCloth=[mat('#9e594d'),mat('#486b7e')];
+for(let stall=0;stall<2;stall++){
+const stand=new TH.Group();stand.position.set(stall*6-3,0,0);market.add(stand);
+box(stand,M.wood,0,1.25,0,4,.32,2.5);
+for(const x of [-1.7,1.7])for(const z of [-1,1])cyl(stand,M.wood,x,1.9,z,.13,3.8);
+const canopy=box(stand,marketCloth[stall],0,3.8,0,4.9,.2,3.1);canopy.rotation.z=stall?.09:-.09;
+for(let j=0;j<5;j++){const crate=box(stand,j%2?M.grass2:M.gold,-1.4+j*.7,1.58,.1,.5,.35,.55);crate.rotation.y=j*.2}
+}
+// Taverne: Vordach, Eingang, Fenster und Außentische als eigenständige Fassade.
+const tavern=new TH.Group();tavern.position.set(19,0,-112);castleCourtyard.add(tavern);
+box(tavern,M.wall,0,3,0,8,6,5);
+const tavernRoof=box(tavern,M.roof,0,6.5,0,9,.65,6);tavernRoof.rotation.z=.09;
+box(tavern,M.wood,0,2.1,2.56,1.7,3.8,.22);
+for(const x of [-2.7,2.7]){box(tavern,M.wood,x,3.3,2.6,1.5,1.8,.2);box(tavern,M.glow,x,3.3,2.73,1.1,1.35,.09)}
+for(const x of [-2.5,2.5]){cyl(tavern,M.wood,x,1.05,5,.8,2.1);box(tavern,M.wood,x,2.15,5,2.4,.22,2.4)}
+// Schmiedeschild und Tavernenzeichen als rein geometrische, lesbare Landmarken.
+const signWood=mat('#5a402d',.03,.88);
+box(smithy,signWood,-3.2,3.1,-1.8,2.5,1.3,.2);
+const hammer=box(smithy,M.iron,-3.2,3.1,-1.64,1.5,.22,.18);hammer.rotation.z=-.55;
+box(tavern,signWood,3.8,4.1,3.1,2,1.5,.2);
+const mug=cyl(tavern,M.gold,3.8,4.1,3.26,.45,.75);mug.rotation.x=Math.PI/2;
+// Licht und Stimmung: sparsame Hoflaternen an den Rändern, keine Dauer-Partikel.
+const courtyardLanterns=new TH.Group();castleCourtyard.add(courtyardLanterns);
+for(const x of [-23,23])for(const z of [-105,-81]){
+cyl(courtyardLanterns,M.wood,x,2,z,.16,4);
+sphere(courtyardLanterns,M.gold,x,4.12,z,.36);
+const lantern=new TH.PointLight('#ffc77d',1.3,11);lantern.position.set(x,4.2,z);courtyardLanterns.add(lantern)}
+
 for(let i=0;i<6;i++){box(world,M.stone2,-44,2,-125+i*9,3,4,9);box(world,M.stone2,44,2,-125+i*9,3,4,9)}tower(-43,-133);tower(43,-133);tower(-43,-75);tower(43,-75);const castle=house(0,-115,2.3,0);
 for(let i=0;i<20;i++){const a=i*Math.PI/10;const x=70+Math.cos(a)*17,z=45+Math.sin(a)*17;rock(x,z,1.4)}const portal=new TH.Group();portal.position.set(70,0,45);world.add(portal);for(const x of [-4,4])cyl(portal,M.stone2,x,4,0,1.2,8);box(portal,M.stone2,0,8,0,10,2,2);const portalGlow=mesh(portal,new TH.PlaneGeometry(7,7),new TH.MeshBasicMaterial({color:'#79b8ff',transparent:true,opacity:.55,side:TH.DoubleSide}),0,4,0);const portalLight=new TH.PointLight('#80aaff',25,18);portalLight.position.set(0,4,0);portal.add(portalLight);
 for(let i=0;i<12;i++){const x=(i%2?7:-7),z=10-i*13;const post=cyl(world,M.wood,x,2,z,.25,4);sphere(world,M.gold,x,4.3,z,.48);const l=new TH.PointLight('#ffbb72',3,11);l.position.set(x,4.3,z);world.add(l)}
