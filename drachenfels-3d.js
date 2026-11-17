@@ -74,6 +74,23 @@ function path(x,z,w,d){box(world,M.dirt,x,.015,z,w,.06,d)}
 path(0,0,11,210);path(0,-52,112,12);path(0,-104,75,13);path(-53,-52,12,88);path(53,-52,12,88);
 for(let i=0;i<115;i++){const x=rand()*260-130,z=rand()*280-140;if(Math.abs(x)<15||Math.abs(z+52)<13&&Math.abs(x)<65||Math.hypot(x,z+104)<42)continue;if(rand()<.82)tree(x,z,.6+rand()*.65);else rock(x,z,.7+rand()*1.7)}
 for(let i=0;i<42;i++){const x=rand()*200-100,z=rand()*210-105;if(Math.abs(x)<11||Math.abs(z+52)<10)continue;const g=new TH.Group();g.position.set(x,0,z);world.add(g);sphere(g,i%2?M.grass2:M.tree2,0,.3,0,.8+rand(),.8+rand())}
+// Waldunterholz als Instanzen: organische Blattflächen und dichte Sträucher ohne tausende Draw-Calls.
+const forestFloor=new TH.Group();world.add(forestFloor);
+const foliageDummy=new TH.Object3D();
+const foliageShape=new TH.Shape();foliageShape.moveTo(0,0);foliageShape.quadraticCurveTo(-.35,.55,-.1,1);foliageShape.quadraticCurveTo(0,1.5,.1,1.7);foliageShape.quadraticCurveTo(.35,.7,0,0);
+const foliageGeo=new TH.ShapeGeometry(foliageShape,6),shrubGeo=new TH.IcosahedronGeometry(1,1);
+function forestClearing(x,z){return Math.abs(x)<12&&z>-116&&z<112||Math.abs(z+52)<12&&Math.abs(x)<70||Math.hypot(x,z+104)<46||x>98&&z>94}
+for(let layer=0;layer<3;layer++){
+const leafMat=new TH.MeshStandardMaterial({color:['#315d3d','#497a45','#688c4c'][layer],side:TH.DoubleSide,roughness:.96});
+const leaves=new TH.InstancedMesh(foliageGeo,leafMat,650);let n=0;
+for(let k=0;k<4500&&n<650;k++){const x=rand()*330-165,z=rand()*330-165;if(forestClearing(x,z))continue;
+foliageDummy.position.set(x,.015,z);foliageDummy.rotation.set(-.15,rand()*6.28,(rand()-.5)*.3);foliageDummy.scale.set(.5+rand()*.8,.6+rand()*1.2,.6+rand());foliageDummy.updateMatrix();leaves.setMatrixAt(n++,foliageDummy.matrix)}
+leaves.count=n;leaves.instanceMatrix.needsUpdate=true;leaves.castShadow=false;forestFloor.add(leaves)}
+for(let layer=0;layer<2;layer++){
+const shrubs=new TH.InstancedMesh(shrubGeo,mat(layer?'#4c7749':'#3a6742',.02,.98),320);let n=0;
+for(let k=0;k<2800&&n<320;k++){const x=rand()*328-164,z=rand()*328-164;if(forestClearing(x,z))continue;
+const size=.38+rand()*.65;foliageDummy.position.set(x,size*.5,z);foliageDummy.rotation.set(0,rand()*6.28,0);foliageDummy.scale.set(size*1.5,size,size*1.2);foliageDummy.updateMatrix();shrubs.setMatrixAt(n++,foliageDummy.matrix)}
+shrubs.count=n;shrubs.instanceMatrix.needsUpdate=true;shrubs.castShadow=false;forestFloor.add(shrubs)}
 const dummy=new TH.Object3D(),meadow=new TH.Group();world.add(meadow);
 const blade=new TH.ConeGeometry(.13,1,3);
 for(let layer=0;layer<3;layer++){const greens=[mat('#487e4e'),mat('#719954'),mat('#9daa63')];const inst=new TH.InstancedMesh(blade,greens[layer],2400);inst.castShadow=false;let n=0;for(let k=0;k<16000&&n<2400;k++){const x=rand()*340-170,z=rand()*340-170;if(Math.abs(x)<9&&z>-112&&z<108||Math.abs(z+52)<9&&Math.abs(x)<65||Math.abs(z+104)<12&&Math.abs(x)<48||x>100&&x<170&&z>95&&z<170)continue;const size=.45+rand()*1.25;dummy.position.set(x,size*.45,z);dummy.rotation.set(0,rand()*6.28,(rand()-.5)*.35);dummy.scale.set(.7+rand(),size,.7+rand());dummy.updateMatrix();inst.setMatrixAt(n++,dummy.matrix)}inst.count=n;inst.instanceMatrix.needsUpdate=true;meadow.add(inst)}
