@@ -9,6 +9,19 @@ scene.add(new TH.HemisphereLight(0xe5f3ff,0x536d54,2.1));
 const sun=new TH.DirectionalLight(0xffdfab,2.8);sun.position.set(45,85,25);sun.castShadow=true;sun.shadow.mapSize.set(innerWidth<700?1024:2048,innerWidth<700?1024:2048);sun.shadow.camera.left=-95;sun.shadow.camera.right=95;sun.shadow.camera.top=95;sun.shadow.camera.bottom=-95;sun.shadow.bias=-.0005;scene.add(sun);
 const mat=(c,metal=0,rough=1)=>new TH.MeshStandardMaterial({color:c,metalness:metal,roughness:rough});
 const M={grass:mat('#60845b'),grass2:mat('#76945c'),dirt:mat('#9b8363'),stone:mat('#7b8588'),stone2:mat('#b7b0a2'),wall:mat('#c7bda7'),roof:mat('#476077'),wood:mat('#72523e'),gold:mat('#e4c27e',.65,.3),iron:mat('#a8bbc0',.75,.3),water:mat('#4a9db0',.15,.17),tree:mat('#3f6f50'),tree2:mat('#5c8851'),dark:mat('#24364c'),skin:mat('#d9ad87'),black:mat('#2b3036'),white:mat('#f4e8ce'),red:mat('#8b4c53'),blue:mat('#527aa8'),glow:new TH.MeshStandardMaterial({color:'#80d7e9',emissive:'#287aab',emissiveIntensity:1.5})};
+// Handgemalte, frei erzeugte Texturen: keine externen Assets oder Lizenzen nötig.
+function paintedTexture(base,kind,size=256,repeat=1){const c=document.createElement('canvas');c.width=c.height=size;const ctx=c.getContext('2d');ctx.fillStyle=base;ctx.fillRect(0,0,size,size);const random=rng(size*31+kind.length*791);for(let i=0;i<(kind==='grass'?8000:3800);i++){const x=random()*size,y=random()*size;ctx.fillStyle=random()>.5?'rgba(255,246,193,.12)':'rgba(19,38,26,.16)';const r=.3+random()*2;ctx.fillRect(x,y,r,r)}
+if(kind==='grass'){for(let i=0;i<1200;i++){const x=random()*size,y=random()*size;ctx.strokeStyle=random()>.5?'rgba(201,220,121,.34)':'rgba(27,79,43,.38)';ctx.lineWidth=.5+random();ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+(random()-.5)*4,y-3-random()*7);ctx.stroke()}}
+if(kind==='stone'||kind==='roof'){const rows=kind==='stone'?9:13,h=size/rows;for(let j=0;j<rows;j++){const off=j%2?size/8:0;for(let i=-1;i<9;i++){const x=i*size/8+off,y=j*h;ctx.strokeStyle='rgba(23,30,38,.31)';ctx.lineWidth=1.8;ctx.strokeRect(x,y,size/8,h);ctx.fillStyle='rgba(255,255,255,.055)';ctx.fillRect(x+2,y+2,size/8-4,h/3)}}}
+if(kind==='wood'){for(let i=0;i<28;i++){const x=random()*size;ctx.strokeStyle='rgba(28,16,10,.19)';ctx.lineWidth=.6+random()*2;ctx.beginPath();ctx.moveTo(x,0);ctx.bezierCurveTo(x+random()*10,size*.3,x-random()*10,size*.6,x+random()*5,size);ctx.stroke()}}
+const t=new TH.CanvasTexture(c);t.wrapS=t.wrapT=TH.RepeatWrapping;t.repeat.set(repeat,repeat);t.colorSpace=TH.SRGBColorSpace;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t}
+M.grass.map=paintedTexture('#769d63','grass',256,48);M.grass.color.set('#ffffff');M.grass.needsUpdate=true;
+M.dirt.map=paintedTexture('#a48c6b','stone',256,1);M.dirt.color.set('#ffffff');M.dirt.needsUpdate=true;
+M.stone.map=paintedTexture('#7c8588','stone',256,2);M.stone.color.set('#ffffff');M.stone.needsUpdate=true;
+M.stone2.map=paintedTexture('#bcb5a7','stone',256,2);M.stone2.color.set('#ffffff');M.stone2.needsUpdate=true;
+M.wall.map=paintedTexture('#c8bfa8','stone',256,2);M.wall.color.set('#ffffff');M.wall.needsUpdate=true;
+M.roof.map=paintedTexture('#57697c','roof',256,2);M.roof.color.set('#ffffff');M.roof.needsUpdate=true;
+M.wood.map=paintedTexture('#8a644c','wood',256,1);M.wood.color.set('#ffffff');M.wood.needsUpdate=true;
 const geo={box:new TH.BoxGeometry(1,1,1),sphere:new TH.SphereGeometry(1,12,10),cone:new TH.ConeGeometry(1,1,7),cyl:new TH.CylinderGeometry(1,1,1,10),torus:new TH.TorusGeometry(1,.13,7,18)};
 function mesh(parent,g,m,x=0,y=0,z=0,sx=1,sy=1,sz=1){const o=new TH.Mesh(g,m);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
 function box(p,m,x,y,z,a,b,c){return mesh(p,geo.box,m,x,y,z,a,b,c)}
