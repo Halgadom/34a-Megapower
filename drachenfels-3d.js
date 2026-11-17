@@ -204,7 +204,7 @@ const gauntlets=g.userData.gauntlets||arms.map(a=>{const mount=new TH.Group();a.
 const shoulderMounts=g.userData.shoulderMounts||arms.map(a=>{const mount=new TH.Group();a.add(mount);return mount});g.userData.shoulderMounts=shoulderMounts;
 const heldSwordMount=g.userData.heldSwordMount||new TH.Group();if(!g.userData.heldSwordMount)arms[0].userData.forearm.add(heldSwordMount);g.userData.heldSwordMount=heldSwordMount;
 const chest=equipped('chest'),helm=equipped('helm'),gloves=equipped('gloves'),boots=equipped('boots'),blade=equipped('weapon'),wing=equipped('wings'),companion=equipped('pet');
-const armorTheme=chest?(chest.name.includes('Drachen')?'dragon':g.userData.heroClass==='Waldläufer'?'ranger':g.userData.heroClass==='Arkanist'?'arcane':'guardian'):'guardian';
+const armorTheme=chest?(chest.name.includes('Drachen')?'dragon':state.class==='Waldläufer'?'ranger':state.class==='Arkanist'?'arcane':'guardian'):'guardian';
 const themeColors={dragon:['#752d30','#e7a94c'],ranger:['#365747','#a7bd86'],arcane:['#39446d','#8cccf2'],guardian:['#344b65','#e4bd79']};
 const theme=themeColors[armorTheme],themeMetal=mat(theme[0],.72,.28),themeAccent=mat(theme[1],.75,.25);
 
