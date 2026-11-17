@@ -123,7 +123,7 @@ const armor=new TH.Group(),weapon=new TH.Group(),wings=new TH.Group(),pet=new TH
 g.userData={body,armor,weapon,wings,pet,legs,arms,head,torso,headBase:3.66};
 if(kind==='hero')rebuildGear(g);else{box(armor,mat(kind==='boss'?'#784568':'#6b735d'),0,2.2,.1,1.65,1.85,1);box(weapon,M.wood,-1.5,1.8,.5,.2,3,.2)}
 return g}
-function rebuildGear(g){const {armor,weapon,wings,pet}=g.userData;for(const group of [armor,weapon,wings,pet]){while(group.children.length)group.remove(group.children[0])}
+function rebuildGear(g){for(const key of ['rune','wingHalo','swordAura'])delete g.userData[key];const {armor,weapon,wings,pet}=g.userData;for(const group of [armor,weapon,wings,pet]){while(group.children.length)group.remove(group.children[0])}
 const chest=equipped('chest'),helm=equipped('helm'),gloves=equipped('gloves'),boots=equipped('boots'),blade=equipped('weapon'),wing=equipped('wings'),companion=equipped('pet');
 const gem=(p,x,y,z,c,r=.18)=>{const a=mesh(p,new TH.OctahedronGeometry(1),c,x,y,z,r,r*1.5,r);a.rotation.y=.4;return a};
 if(chest){const c=enchantedMaterial(chest.rarity),dark=mat('#243342',.4,.55),trim=chest.rarity>=3?M.gold:M.iron;box(armor,c,0,2.25,.14,1.8,1.88,1.1);box(armor,dark,0,2.25,.72,1.25,1.35,.12);box(armor,trim,0,2.84,.79,1.42,.16,.15);box(armor,trim,0,1.66,.8,1.5,.16,.14);box(armor,trim,0,2.28,.8,.12,1.12,.14);for(const x of [-1,1]){const shoulder=sphere(armor,c,x*1.03,2.98,0,.55);shoulder.scale.set(1.3,.72,1.2);cone(armor,trim,x*1.23,3.4,0,.22,.85);box(armor,c,x*.42,1.15,.05,.53,.67,.7)}gem(armor,0,2.42,.88,mat(colors[chest.rarity],.2,.1),.22+chest.rarity*.03);if(chest.rarity>=3){for(const x of [-.7,.7]){const spike=cone(armor,trim,x,3.18,-.1,.2,.95);spike.rotation.z=x*.4}}if(chest.name.includes('Drachen')){for(const x of [-1,1]){cone(armor,M.gold,x*1.4,3.45,-.2,.23,1.25);box(armor,M.red,x*.4,2.2,.82,.13,.85,.14)}}}
@@ -229,7 +229,7 @@ function preview(){const pr=window.DrachenfelsPortraitRenderer||(portraitRendere
 const ps=new TH.Scene();ps.background=new TH.Color('#1c2634');ps.add(new TH.HemisphereLight(0xe7f4ff,0x384957,2.6));const pl=new TH.DirectionalLight(0xffd6a4,3.5);pl.position.set(3,8,6);ps.add(pl);const rim=new TH.DirectionalLight(0x7d9cfa,2.5);rim.position.set(-4,4,-5);ps.add(rim);
 const pedestal=mesh(ps,new TH.CylinderGeometry(2.6,2.9,.45,24),M.stone2,0,-.24,0);const ring=mesh(ps,new TH.TorusGeometry(2.35,.055,6,48),M.gold,0,.03,0);ring.rotation.x=Math.PI/2;
 const clone=makeCharacter();ps.add(clone);clone.rotation.y=portraitAngle;const pc=new TH.PerspectiveCamera(43,360/250,.1,100);pc.position.set(Math.sin(.35)*portraitZoom,3.5,Math.cos(.35)*portraitZoom);pc.lookAt(0,2.25,0);pr.render(ps,pc);ps.remove(clone);
-clone.traverse(o=>{if(o.geometry&&!Object.values(geo).includes(o.geometry)&&!o.geometry.userData?.shared)o.geometry.dispose()});
+// Die Vorschau nutzt dieselben Materialien und Geometrien wie die Spielfigur; keine gemeinsamen Ressourcen zerstören.
 }
 
 function equip(it){state.equip[it.slot]=it.id;selected=it.id;rebuildGear(hero);save();hud();render();toast('✓ '+it.name+' angelegt')}
