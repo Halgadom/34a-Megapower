@@ -30,3 +30,5 @@ test('Forest trees have distinct oak birch and pine silhouettes',()=>{for(const 
 test('Forest terrain roads light and castle approach are implemented',()=>{for(const token of ['const groundPatches=new TH.Group()','new TH.InstancedMesh(patchGeo,patchMat,460)','const pathEdgeMat=','function path(x,z,w,d)','sun.color.copy(new TH.Color','renderer.toneMappingExposure=1.02+day*.2','function castleApproach()','castleApproach();'])assert.ok(js.includes(token),token)});
 
 test('Castle towers have architectural layers and trees have buttress roots',()=>{for(const token of ['const castleWindowMat=','for(const y of [h*.35,h*.7,h-.8])','const crenel=box(g','for(let root=0;root<3;root++)','const buttress=mesh(g'])assert.ok(js.includes(token),token)});
+
+test('Castle gate has an open passage and furnished courtyard',()=>{for(const token of ['if(i!==3&&i!==4)','const castleGate=new TH.Group()','const castleCourtyard=new TH.Group()','cyl(castleCourtyard,M.water','box(castleGate,M.stone2,0,10.8'])assert.ok(js.includes(token),token)});
