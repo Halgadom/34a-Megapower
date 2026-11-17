@@ -72,3 +72,30 @@ Ein vollständig kostenloses, deutschsprachiges, WoW-inspiriertes Browser-3D-Fan
 ### Freigaberegel
 - Erst nach vollständig bestandener Funktions- und Grafikabnahme, dokumentierten Asset-Lizenzen und ausdrücklicher Freigabe des Nutzers die öffentliche Seite wieder öffnen.
 - Keine kostenpflichtigen Assets, Dienste, Echtgeldkäufe oder Abos.
+
+## Bestätigter vollständiger Funktionsumfang – Nutzer wünscht ALLE Ideen 1–10
+
+**Verbindliche Produktvision:** Alle zehn Ideen sind angenommen. Sie sind geplante Features, nicht als implementiert oder getestet zu bezeichnen.
+
+1. Hochwertiger MMORPG-Held: bessere Proportionen, Gesicht, Haare, vollständige Animationen.
+2. Glaubwürdige Fantasywelt: dichte Wälder, natürliche Vegetation, Wege, Burgen, stimmige Materialien.
+3. Sichtbare hochwertige Ausrüstung: Rüstungssets, Flügel, Waffen und echte visuelle Seltenheitsunterschiede.
+4. Lebendige Hauptstadt: Burg, Thronsaal, Schmiede, Marktplatz, Taverne, Händler und NPC-Tagesabläufe.
+5. Charaktereditor: Gesicht, Haare, Hauttöne, Körperbau, Klasse; im Speicherstand persistent.
+6. Mehrphasige Bosskämpfe: Drachen, Schattenritter, Waldwächter mit spezifischen Attacken und erspielbarer Beute.
+7. Reittiere und Begleiter: Pferde, Wölfe, später Drachen; Freischaltung durch Spiel, ohne Echtgeld.
+8. Legendäre Rüstungssets: individuelle 3D-Formen, Setboni, verschiedene Material- und Farbschemata; nicht nur Umfärbungen.
+9. §34a-Akademie: Räume und Aufgaben zu Recht, Datenschutz, Umgang mit Menschen etc.; fachlich verifizierte Fragen, nachvollziehbare lokale Auswertung, keine falsche amtliche Prüfungszusage.
+10. Umfangreiche Dungeons: mehrere Räume, Rätsel, Geheimnisse, Zwischen- und Endbosse.
+
+### Umsetzungsreihenfolge (Abhängigkeiten)
+**Phase 1: Grafik-Fundament** – 1, 2, 3, 8 (ein hochwertiger Referenzheld, vollständiges Set, glaubwürdiges Referenzgebiet).
+**Phase 2: Personalisierung und Spielwelt** – 5, 4, 7 (Editor, Stadt/NPCs, Reittiere).
+**Phase 3: Lern- und Abenteuerkampagne** – 9, 6, 10 (§34a-Akademie, Bosse, Dungeons, zusammenhängende Questkette).
+**Phase 4: Qualitätsabnahme** – Browser-/Mobiltests, Speicherstände, Performance, Rechte/Lizenzen, fachliche Kontrolle, optische Freigabe durch Nutzer.
+
+### Rahmenbedingungen
+- **100 % kostenlos**: keine kostenpflichtigen Assets, Echtgeldkäufe, Abos oder bezahlten APIs.
+- **Öffentliche Spielseiten bleiben gesperrt**, bis Nutzer nach vollständiger Qualitätsabnahme ausdrücklich freigibt.
+- Technische Zieldefinition vorerst **Einzelspieler-Fantasy-Browser-RPG im MMO-Stil**. Ein echtes gleichzeitiges Multiplayer-MMO braucht zusätzliche Infrastruktur und darf nicht ohne Planung/Kostenklärung versprochen werden.
+- Bereits bestehende Spielfunktionen erhalten, aber optisch und technisch neu konsolidieren. Keine kleinen öffentlichen Zwischenversionen.
