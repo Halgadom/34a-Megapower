@@ -155,8 +155,19 @@ const neck=mesh(body,new TH.CylinderGeometry(.21,.24,.35,10),skin,0,3.2,0);
 const head=mesh(body,new TH.SphereGeometry(1,16,12),skin,0,3.66,.03,.55,.66,.51);
 const nose=mesh(body,new TH.SphereGeometry(1,8,6),skin,0,3.55,.54,.115,.15,.17);
 for(const side of [-1,1]){sphere(body,skin,side*.54,3.62,0,.14);const eye=mesh(body,new TH.SphereGeometry(1,8,6),M.white,side*.21,3.73,.5,.125,.085,.07);sphere(body,materials.eye,side*.21,3.73,.57,.055);const brow=box(body,materials.hair,side*.22,3.91,.52,.27,.045,.07);brow.rotation.z=side*.12}
-const hair=mesh(body,new TH.SphereGeometry(1,12,9),materials.hair,0,4.08,-.07,.59,.32,.56);
-for(let i=0;i<7;i++){const angle=(i-3)*.34;const lock=mesh(body,new TH.ConeGeometry(.13,.45,5),materials.hair,Math.sin(angle)*.46,3.91,Math.cos(angle)*.44,.9,1,.8);lock.rotation.z=Math.sin(angle)*.3}
+const hairRoot=new TH.Group();body.add(hairRoot);const hair=mesh(hairRoot,new TH.SphereGeometry(1,20,14),materials.hair,0,4.08,-.07,.59,.32,.56);
+for(let i=0;i<7;i++){const angle=(i-3)*.34;const lock=mesh(hairRoot,new TH.ConeGeometry(.13,.45,5),materials.hair,Math.sin(angle)*.46,3.91,Math.cos(angle)*.44,.9,1,.8);lock.rotation.z=Math.sin(angle)*.3}
+// Anatomische Gesichtsdetails: Kiefer, Wangen, Augenlider, Iris, Lichtreflexe und Mund.
+const faceShade=mat(kind==='boss'?'#755b90':'#b98567',.03,.96),lip=mat(kind==='boss'?'#6c536e':'#965e50',.02,.94);
+mesh(body,new TH.SphereGeometry(1,18,12),skin,0,3.36,.14,.39,.19,.32);
+for(const side of [-1,1]){
+mesh(body,new TH.SphereGeometry(1,12,8),skin,side*.38,3.53,.34,.22,.2,.2);
+const lid=mesh(body,new TH.TorusGeometry(.105,.025,5,16,Math.PI),faceShade,side*.21,3.77,.568);lid.rotation.z=.05*side;
+sphere(body,M.white,side*.19,3.75,.632,.023);
+const nostril=sphere(body,faceShade,side*.075,3.48,.68,.025);nostril.scale.y=.5;
+}
+const mouth=mesh(body,new TH.TorusGeometry(.14,.018,5,16,Math.PI),lip,0,3.34,.5);mouth.rotation.z=Math.PI;
+for(let j=0;j<5;j++){const strand=mesh(hairRoot,new TH.ConeGeometry(.065,.3,5),materials.hair,-.42+j*.21,4.01,.43);strand.rotation.z=(j-2)*.18}
 // Hochwertigere Grundausstattung bleibt auch ohne Loot sichtbar.
 const underArmor=new TH.Group();body.add(underArmor);
 const leather=mat(kind==='boss'?'#4e394d':'#504b4a',.18,.8),seam=mat('#c9a56b',.55,.42);
@@ -172,7 +183,7 @@ const capeMesh=mesh(cape,new TH.ShapeGeometry(capeShape,12),capeFabric,0,0,-.12)
 for(const side of [-1,1]){const trim=mesh(cape,new TH.CylinderGeometry(.035,.045,3.05,6),capeTrim,side*.77,-1.5,-.08);trim.rotation.z=side*.12}
 const clasp=mesh(cape,new TH.OctahedronGeometry(.19),capeTrim,0,-.12,.08);
 const armor=new TH.Group(),weapon=new TH.Group(),wings=new TH.Group(),pet=new TH.Group();body.add(armor,weapon,wings);g.add(pet);
-g.userData={body,armor,weapon,wings,pet,cape,capeMesh,legs,arms,head,torso,headBase:3.66};
+g.userData={body,armor,weapon,wings,pet,cape,capeMesh,legs,arms,head,hairRoot,torso,headBase:3.66};
 if(kind==='hero')rebuildGear(g);else{box(armor,mat(kind==='boss'?'#784568':'#6b735d'),0,2.2,.1,1.65,1.85,1);box(weapon,M.wood,-1.5,1.8,.5,.2,3,.2)}
 return g}
 function rebuildGear(g){for(const key of ['rune','wingHalo','swordAura','heldSword'])delete g.userData[key];const {armor,weapon,wings,pet,arms,legs}=g.userData;for(const group of [armor,weapon,wings,pet,...(g.userData.gauntlets||[]),...(g.userData.greaves||[]),...(g.userData.shoulderMounts||[]),...(g.userData.heldSwordMount?[g.userData.heldSwordMount]:[])]){while(group.children.length)group.remove(group.children[0])}
@@ -180,6 +191,7 @@ const gauntlets=g.userData.gauntlets||arms.map(a=>{const mount=new TH.Group();a.
 const shoulderMounts=g.userData.shoulderMounts||arms.map(a=>{const mount=new TH.Group();a.add(mount);return mount});g.userData.shoulderMounts=shoulderMounts;
 const heldSwordMount=g.userData.heldSwordMount||new TH.Group();if(!g.userData.heldSwordMount)arms[0].userData.forearm.add(heldSwordMount);g.userData.heldSwordMount=heldSwordMount;
 const chest=equipped('chest'),helm=equipped('helm'),gloves=equipped('gloves'),boots=equipped('boots'),blade=equipped('weapon'),wing=equipped('wings'),companion=equipped('pet');
+if(g.userData.hairRoot)g.userData.hairRoot.visible=!helm;
 const gem=(p,x,y,z,c,r=.18)=>{const a=mesh(p,new TH.OctahedronGeometry(1),c,x,y,z,r,r*1.5,r);a.rotation.y=.4;return a};
 if(chest){const c=enchantedMaterial(chest.rarity),dark=mat('#243342',.4,.55),trim=chest.rarity>=3?M.gold:M.iron;mesh(armor,new TH.CylinderGeometry(.84,.65,1.75,12),c,0,2.25,.06,1,1,.83);mesh(armor,new TH.CylinderGeometry(.72,.58,1.3,12),dark,0,2.25,.25,1,1,.8);box(armor,trim,0,2.84,.79,1.42,.16,.15);box(armor,trim,0,1.66,.8,1.5,.16,.14);box(armor,trim,0,2.28,.8,.12,1.12,.14);for(const x of [-1,1]){const mount=shoulderMounts[x===-1?0:1];const shoulder=sphere(mount,c,x*.22,-.07,0,.55);shoulder.scale.set(1.3,.72,1.2);cone(mount,trim,x*.36,.36,0,.22,.85);box(armor,c,x*.42,1.15,.05,.53,.67,.7)}gem(armor,0,2.42,.88,mat(colors[chest.rarity],.2,.1),.22+chest.rarity*.03);if(chest.rarity>=3){for(const x of [-.7,.7]){const spike=cone(armor,trim,x,3.18,-.1,.2,.95);spike.rotation.z=x*.4}}if(chest.name.includes('Drachen')){for(const x of [-1,1]){cone(armor,M.gold,x*1.4,3.45,-.2,.23,1.25);box(armor,M.red,x*.4,2.2,.82,.13,.85,.14)}}}
 if(chest&&chest.rarity>=2){const inlay=mat(chest.rarity>=4?'#e6b957':'#83b8d9',.7,.24);for(const side of [-1,1]){const edge=box(armor,inlay,side*.73,2.25,.77,.1,1.2,.12);edge.rotation.z=side*.17;for(let j=0;j<3;j++){const stud=sphere(armor,inlay,side*.76,2.68-j*.38,.85,.09);stud.scale.z=.55}}}
