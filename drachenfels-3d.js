@@ -347,7 +347,47 @@ for(const it of state.bag){const b=document.createElement('button');b.className=
 details.replaceChildren();const it=state.bag.find(i=>i.id===selected);if(!it){p(details,'Wähle einen Gegenstand, um seine Werte zu sehen.');return}const h=document.createElement('h3');h.style.color=colors[it.rarity];h.textContent=icon[it.slot]+' '+it.name+' · '+tiers[it.rarity];details.append(h);p(details,'⚔️ Angriff +'+(it.attack+it.upgrade*3)+' · 🛡️ Abwehr +'+(it.defense+it.upgrade*2)+' · Verbesserung +'+it.upgrade);btn(details,'✓ Ausrüsten',()=>equip(it));if(state.equip[it.slot]===it.id)btn(details,'↩ Ablegen',()=>{delete state.equip[it.slot];rebuildGear(hero);save();render()});btn(details,'🔨 Verbessern · '+(30+it.upgrade*35)+' Gold',()=>{const cost=30+it.upgrade*35;if(state.gold<cost)return toast('Zu wenig Gold');if(it.upgrade>=10)return toast('Maximal +10');state.gold-=cost;it.upgrade++;rebuildGear(hero);save();hud();render()});btn(details,'🪙 Verkaufen · '+it.value+' Gold',()=>{if(state.bag.length<=1)return toast('Du musst einen Gegenstand behalten');state.gold+=it.value;state.bag=state.bag.filter(i=>i.id!==it.id);if(state.equip[it.slot]===it.id)delete state.equip[it.slot];selected=null;rebuildGear(hero);save();hud();render()})}
 render()}
 function create(){const d=panel('🐉 Drachenfels 3D · Charaktererstellung');p(d,'Willkommen in einer neuen kostenlosen 3D-Fantasywelt. Wähle deinen Helden.');const input=document.createElement('input');input.className='input';input.placeholder='Name deines Helden';input.maxLength=24;d.append(input);for(const c of ['Wächter','Waldläufer','Arkanist'])btn(d,'⚔️ '+c,()=>{state=fresh();state.name=input.value.trim()||'Abenteurer';state.class=c;const i=randomItem(1);i.slot='weapon';i.name=c==='Arkanist'?'Arkanstab':c==='Waldläufer'?'Waldklinge':'Wächterklinge';state.bag=[i];state.equip.weapon=i.id;equipVisualStarter();hero.position.set(0,0,25);rebuildGear(hero);styleHero();state.hp=stats().maxhp;save();hud();closePanel();toast('Willkommen in Drachenfels, '+state.name+'!')})}
-function move(dt,t){let x=0,z=0;if(keys.has('up')||keys.has('w')||keys.has('arrowup'))z-=1;if(keys.has('down')||keys.has('s')||keys.has('arrowdown'))z+=1;if(keys.has('left')||keys.has('a')||keys.has('arrowleft'))x-=1;if(keys.has('right')||keys.has('d')||keys.has('arrowright'))x+=1;const length=Math.hypot(x,z);walking=length>0;if(length&&!opened){const forward=new TH.Vector3(-Math.sin(yaw),0,-Math.cos(yaw)),right=new TH.Vector3(Math.cos(yaw),0,-Math.sin(yaw));const delta=forward.multiplyScalar(-z/length).addScaledVector(right,x/length);hero.position.addScaledVector(delta,Math.min(.05,dt)*9);hero.position.x=TH.MathUtils.clamp(hero.position.x,run.active?102:-170,run.active?168:170);hero.position.z=TH.MathUtils.clamp(hero.position.z,run.active?97:-170,run.active?163:170);hero.rotation.y=Math.atan2(delta.x,delta.z);state.pos=hero.position.toArray();if(Math.floor(t/1200)!==Math.floor((t-dt*1000)/1200))save()}const body=hero.userData.body;body.position.y=walking?Math.abs(Math.sin(t*.012))*.12:Math.sin(t*.002)*.025;if(hero.userData.cloak)hero.userData.cloak.rotation.x=-.13+(walking?Math.sin(t*.012)*.11:.025*Math.sin(t*.002));for(let j=0;j<2;j++){hero.userData.legs[j].rotation.x=walking?Math.sin(t*.012+j*Math.PI)*.65:0;hero.userData.arms[j].rotation.x=walking?Math.sin(t*.012+j*Math.PI+Math.PI)*.45:Math.sin(t*.0018+j)*.025;hero.userData.arms[j].rotation.z=walking?(j?-.08:.08):Math.sin(t*.0014+j)*.035;hero.userData.legs[j].userData.shin.rotation.x=walking?Math.max(0,Math.sin(t*.012+j*Math.PI))*.85:0;hero.userData.arms[j].userData.forearm.rotation.x=walking?-.15-Math.max(0,Math.sin(t*.012+j*Math.PI))*.3:-.12}}
+// Kontinuierlicher Bewegungszustand: Beschleunigung, Abbremsen und Gelenk-Dämpfung.
+const locomotion={speed:0,phase:0,heading:0};
+function smoothJoint(current,target,dt,response=11){return TH.MathUtils.lerp(current,target,1-Math.exp(-response*dt))}
+function move(dt,t){
+let x=0,z=0;
+if(keys.has('up')||keys.has('w')||keys.has('arrowup'))z-=1;
+if(keys.has('down')||keys.has('s')||keys.has('arrowdown'))z+=1;
+if(keys.has('left')||keys.has('a')||keys.has('arrowleft'))x-=1;
+if(keys.has('right')||keys.has('d')||keys.has('arrowright'))x+=1;
+const length=Math.hypot(x,z),moving=length>0&&!opened;
+const targetSpeed=moving?9:0;
+locomotion.speed=smoothJoint(locomotion.speed,targetSpeed,dt,moving?7:10);
+walking=locomotion.speed>.12;
+if(moving){
+const forward=new TH.Vector3(-Math.sin(yaw),0,-Math.cos(yaw)),right=new TH.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
+const delta=forward.multiplyScalar(-z/length).addScaledVector(right,x/length);
+hero.position.addScaledVector(delta,Math.min(.05,dt)*locomotion.speed);
+hero.position.x=TH.MathUtils.clamp(hero.position.x,run.active?102:-170,run.active?168:170);
+hero.position.z=TH.MathUtils.clamp(hero.position.z,run.active?97:-170,run.active?163:170);
+const targetAngle=Math.atan2(delta.x,delta.z),turn=Math.atan2(Math.sin(targetAngle-hero.rotation.y),Math.cos(targetAngle-hero.rotation.y));
+hero.rotation.y+=turn*(1-Math.exp(-12*dt));
+state.pos=hero.position.toArray();
+if(Math.floor(t/1200)!==Math.floor((t-dt*1000)/1200))save();
+}
+const strength=Math.min(1,locomotion.speed/9);
+locomotion.phase+=dt*(5+locomotion.speed*.85);
+const stride=Math.sin(locomotion.phase),bob=Math.abs(Math.sin(locomotion.phase));
+const body=hero.userData.body;
+body.position.y=smoothJoint(body.position.y,strength*bob*.095+(1-strength)*Math.sin(t*.002)*.022,dt,9);
+body.rotation.z=smoothJoint(body.rotation.z,moving?x/Math.max(1,length)*-.065:0,dt,8);
+if(hero.userData.cloak)hero.userData.cloak.rotation.x=smoothJoint(hero.userData.cloak.rotation.x,-.13-strength*.13+Math.sin(locomotion.phase)*strength*.07,dt,6);
+for(let j=0;j<2;j++){
+const offset=j*Math.PI,cycle=Math.sin(locomotion.phase+offset);
+const leg=hero.userData.legs[j],arm=hero.userData.arms[j];
+leg.rotation.x=smoothJoint(leg.rotation.x,cycle*.61*strength,dt,13);
+leg.userData.shin.rotation.x=smoothJoint(leg.userData.shin.rotation.x,Math.max(0,-cycle)*.7*strength,dt,12);
+arm.rotation.x=smoothJoint(arm.rotation.x,-cycle*.42*strength+(1-strength)*Math.sin(t*.0018+j)*.025,dt,12);
+arm.rotation.z=smoothJoint(arm.rotation.z,(j?-.09:.09)*strength,dt,9);
+arm.userData.forearm.rotation.x=smoothJoint(arm.userData.forearm.rotation.x,-.14-Math.max(0,cycle)*.24*strength,dt,11);
+}
+}
 function animate(t){requestAnimationFrame(animate);updateSky(t);for(let i=floatingHits.length-1;i>=0;i--){const f=floatingHits[i],p=(t-f.start)/850;if(p>=1){scene.remove(f.sprite);f.sprite.material.dispose();f.tex.dispose();floatingHits.splice(i,1)}else{f.sprite.position.set(f.x,3.8+p*2.4,f.z);f.sprite.material.opacity=1-p}}
 for(const m of mobs)if(m.alive&&m.barGroup){m.barGroup.quaternion.copy(camera.quaternion);m.barGroup.visible=hero.position.distanceTo(m.mesh.position)<35}if(t-minimapTick>140){minimapTick=t;refreshMMO()}const dt=Math.min(.05,(t-(animate.last||t))/1000);animate.last=t;move(dt,t);updateSpells(t,dt);for(const m of mobs)if(m.alive){if(m.aura)m.aura.rotation.z=t*.0007;m.mesh.userData.body.position.y=Math.sin(t*.0015+m.phase)*.07;if(!opened&&hero.position.distanceTo(m.mesh.position)<2.4&&Math.floor(t/1700)!==Math.floor((t-dt*1000)/1700)){state.hp=Math.max(1,state.hp-Math.max(1,8-Math.floor(stats().defense/15)));if(state.hp<=1){state.hp=stats().maxhp;hero.position.set(0,0,25);toast('💀 Du erwachst in Sonnenhain.')}hud()}}for(const n of npcs)n.marker.position.y=5.7+Math.sin(t*.003+n.x)*.3;for(const chest of treasureChests)if(!chest.opened){chest.glow.position.y=1.53+Math.sin(t*.003+chest.id)*.18;chest.glow.rotation.y=t*.001}portalGlow.material.opacity=.4+Math.sin(t*.002)*.18;
 if(hero.userData.rune)hero.userData.rune.rotation.z=Math.sin(t*.0016)*.18;hero.userData.capeMesh.rotation.y=Math.sin(t*.003)*.08;hero.userData.capeMesh.rotation.x=-.14-(walking?.18:0);
