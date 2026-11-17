@@ -1,0 +1,25 @@
+name: Drachenfels quality gate
+on:
+  push:
+    paths:
+      - 'drachenfels-3d.js'
+      - 'drachenfels.html'
+      - 'drachenfels-3d.html'
+      - 'tests/**'
+      - '.github/workflows/drachenfels-quality.yml'
+  pull_request:
+    paths:
+      - 'drachenfels-3d.js'
+      - 'drachenfels.html'
+      - 'drachenfels-3d.html'
+      - 'tests/**'
+jobs:
+  static-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify game syntax, saved data, feature presence and unpublished status
+        run: node tests/game-check.cjs
