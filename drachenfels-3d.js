@@ -51,7 +51,12 @@ const stars=new TH.Points(starGeo,new TH.PointsMaterial({color:'#e8eaff',size:1.
 const nightLanterns=new TH.Group();scene.add(nightLanterns);
 function updateSky(t){const phase=(t*.000012+1.1)%(Math.PI*2),height=Math.sin(phase),day=TH.MathUtils.smoothstep(height,-.17,.32),twilight=1-Math.min(1,Math.abs(height)*2.8);
 scene.background.copy(nightSky).lerp(daylightSky,day).lerp(twilightSky,twilight*.4);scene.fog.color.copy(scene.background);
-sun.intensity=.3+day*2.5;skyLight.intensity=.12+day*.45;
+// Schritt 3: wärmere Abendsonne, kühler Mondschein und sanftere Schatten.
+sun.intensity=.25+day*2.35;skyLight.intensity=.16+day*.5;
+sun.color.copy(new TH.Color('#91a7d1')).lerp(new TH.Color('#fff0cb'),day).lerp(new TH.Color('#ffba82'),twilight*.32);
+sun.position.set(hero.position.x+Math.cos(phase)*85,55+Math.max(0,height)*50,hero.position.z+Math.sin(phase)*65);
+sun.target.position.set(hero.position.x,0,hero.position.z);sun.target.updateMatrixWorld();
+renderer.toneMappingExposure=1.02+day*.2;
 sunDisc.position.set(hero.position.x+Math.cos(phase)*330,Math.sin(phase)*255,hero.position.z-230);
 moonDisc.position.set(hero.position.x-Math.cos(phase)*330,-Math.sin(phase)*255,hero.position.z+230);
 sunDisc.visible=height>-.05;moonDisc.visible=height<.1;
@@ -94,12 +99,49 @@ decor.push(g)
 }
 function rock(x,z,s=1){const a=mesh(world,new TH.DodecahedronGeometry(1,0),M.stone,x,.6*s,z,1.5*s,.9*s,1.2*s);a.rotation.y=rand()*6}
 function house(x,z,scale=1,style=0){const g=new TH.Group();g.position.set(x,0,z);g.scale.setScalar(scale);world.add(g);box(g,M.stone2,0,.5,0,10,1,9);box(g,M.wall,0,4.3,0,9.5,7,8.5);const roofMat=style?M.red:M.roof;const left=box(g,roofMat,-2.5,9.3,0,6.8,.85,11.5);left.rotation.z=-.55;const right=box(g,roofMat,2.5,9.3,0,6.8,.85,11.5);right.rotation.z=.55;box(g,M.wood,0,2.5,4.36,2.4,4,.3);for(const xx of [-3,3]){box(g,M.wood,xx,5.1,4.38,1.7,2.3,.25);box(g,M.glow,xx,5.1,4.55,1.1,1.7,.12);box(g,M.wood,xx,5.1,4.7,.12,2,.12);box(g,M.wood,xx,5.1,4.7,1.5,.12,.12)}for(const xx of [-4.3,4.3])for(const zz of [-3.8,3.8])box(g,M.wood,xx,4.3,zz,.5,7.8,.5);return g}
+// Schritt 4: Burgzufahrt mit gestaffelten Mauerfüßen und verwitterten Steinlagen.
+const castleApproachMat=mat('#8d9188',.04,.94);
+function castleApproach(){
+const entrance=box(world,castleApproachMat,0,.045,-119,15,.09,31);
+for(const side of [-1,1]){
+box(world,M.stone2,side*9,.36,-119,2.2,.72,31);
+for(let j=0;j<11;j++){
+const block=box(world,j%3?M.stone:M.stone2,side*(8.3+(j%2)*.18),.82,-133+j*2.8,1.4,.35,2.25);
+block.rotation.y=side*(j%3-1)*.035;
+}
+}
+}
+castleApproach();
 function tower(x,z,h=22){const g=new TH.Group();g.position.set(x,0,z);world.add(g);cyl(g,M.stone2,0,h/2,0,4.5,h);cone(g,M.roof,0,h+4,0,6,9);for(let j=0;j<8;j++){const a=j*Math.PI/4;box(g,M.stone,Math.cos(a)*4.6,h-1,Math.sin(a)*4.6,1.4,3,1.4)}return g}
-function path(x,z,w,d){box(world,M.dirt,x,.015,z,w,.06,d)}
+// Schritt 1: weiche Erd-/Moosübergänge an den Wegen statt nackter Rechtecke.
+const pathEdgeMat=mat('#78835c',.02,.99),pathStoneMat=mat('#8e8977',.04,.94);
+function path(x,z,w,d){
+box(world,pathEdgeMat,x,.002,z,w+2.8,.025,d+2.8);
+box(world,M.dirt,x,.022,z,w,.065,d);
+const alongZ=d>w,steps=Math.floor((alongZ?d:w)/3.4);
+for(let i=0;i<steps;i++){const offset=(i+.5-steps/2)*3.4;
+for(const side of [-1,1]){
+const px=x+(alongZ?side*(w*.48+rand()*.65):offset);
+const pz=z+(alongZ?offset:side*(d*.48+rand()*.65));
+const pebble=mesh(world,new TH.DodecahedronGeometry(.28,0),pathStoneMat,px,.07,pz,.75+rand()*.6,.28,.65+rand()*.6);
+pebble.rotation.y=rand()*6.28;
+}}
+}
 path(0,0,11,210);path(0,-52,112,12);path(0,-104,75,13);path(-53,-52,12,88);path(53,-52,12,88);
 for(let i=0;i<115;i++){const x=rand()*260-130,z=rand()*280-140;if(Math.abs(x)<15||Math.abs(z+52)<13&&Math.abs(x)<65||Math.hypot(x,z+104)<42)continue;if(rand()<.82)tree(x,z,.6+rand()*.65);else rock(x,z,.7+rand()*1.7)}
 for(let i=0;i<42;i++){const x=rand()*200-100,z=rand()*210-105;if(Math.abs(x)<11||Math.abs(z+52)<10)continue;const g=new TH.Group();g.position.set(x,0,z);world.add(g);sphere(g,i%2?M.grass2:M.tree2,0,.3,0,.8+rand(),.8+rand())}
 // Waldunterholz als Instanzen: organische Blattflächen und dichte Sträucher ohne tausende Draw-Calls.
+// Schritt 2: schattiger Waldboden aus Moos-, Laub- und Erdinseln.
+const groundPatches=new TH.Group();world.add(groundPatches);
+const patchGeo=new TH.CircleGeometry(1,9),patchDummy=new TH.Object3D();
+for(let layer=0;layer<3;layer++){
+const patchMat=new TH.MeshStandardMaterial({color:['#496b43','#776447','#60784a'][layer],roughness:1,side:TH.DoubleSide});
+const patches=new TH.InstancedMesh(patchGeo,patchMat,460);let count=0;
+for(let k=0;k<3500&&count<460;k++){const x=rand()*330-165,z=rand()*330-165;
+if(Math.abs(x)<13&&z>-116&&z<112||Math.abs(z+52)<13&&Math.abs(x)<70||Math.hypot(x,z+104)<47||x>98&&z>94)continue;
+patchDummy.position.set(x,-.037+layer*.002,z);patchDummy.rotation.set(-Math.PI/2,0,rand()*6.28);
+patchDummy.scale.set(1.4+rand()*3.3,1.2+rand()*2.8,1);patchDummy.updateMatrix();patches.setMatrixAt(count++,patchDummy.matrix)}
+patches.count=count;patches.instanceMatrix.needsUpdate=true;patches.receiveShadow=true;groundPatches.add(patches)}
 const forestFloor=new TH.Group();world.add(forestFloor);
 const foliageDummy=new TH.Object3D();
 const foliageShape=new TH.Shape();foliageShape.moveTo(0,0);foliageShape.quadraticCurveTo(-.35,.55,-.1,1);foliageShape.quadraticCurveTo(0,1.5,.1,1.7);foliageShape.quadraticCurveTo(.35,.7,0,0);
