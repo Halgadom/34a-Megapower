@@ -16,3 +16,5 @@ test('Only one cape mesh per hero',()=>{assert.ok(js.includes('g.userData.cloak=
 test('Armor mounts are reused and sword does not accumulate after re-equipping',()=>{for(const token of ['g.userData.shoulderMounts||arms.map','g.userData.heldSwordMount||new TH.Group()','heldSwordMount.add(sword)','shoulderMounts[x===-1?0:1]','shoulderMounts[side===-1?0:1]'])assert.ok(js.includes(token),token);assert.ok(!js.includes('arms[0].userData.forearm.add(sword)'))});
 
 test('Locomotion uses delta-time blending and smooth articulated joints',()=>{for(const token of ['const locomotion={speed:0,phase:0,heading:0}','function smoothJoint(','locomotion.phase+=dt*','hero.rotation.y+=turn*','leg.userData.shin.rotation.x=smoothJoint'])assert.ok(js.includes(token),token)});
+
+test('Character face and hair react to helmets',()=>{for(const token of ['const hairRoot=new TH.Group()','g.userData.hairRoot.visible=!helm','const mouth=mesh(body','const nostril=sphere(body','head,hairRoot,torso'])assert.ok(js.includes(token),token)});
