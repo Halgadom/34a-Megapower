@@ -60,13 +60,38 @@ const dayLabel=document.getElementById('daycycle');if(dayLabel&&Math.floor(t/100
 }
 // Wald statt geometrischer Kugelbäume: abgestufte Äste und natürlich geformte Kronen.
 const barkMat=mat('#5b4533',.02,.98),leafMats=['#426e45','#557d45','#64894c','#3d6544','#789351'].map(c=>mat(c,.01,1));
-const trunkGeo=new TH.CylinderGeometry(.26,.46,5.6,7),branchGeo=new TH.CylinderGeometry(.08,.17,2.8,5),leafGeo=new TH.IcosahedronGeometry(1,1);
-function tree(x,z,s=1){const g=new TH.Group();g.position.set(x,0,z);g.scale.setScalar(s);world.add(g);
-mesh(g,trunkGeo,barkMat,0,2.8,0);const seed=Math.abs(Math.floor(x*23+z*41)),tone=seed%leafMats.length;
-for(let k=0;k<7;k++){const a=k*2.399963+seed*.1,level=3.6+(k%3)*1.08,r=1.2+(k%2)*.55;
-const branch=mesh(g,branchGeo,barkMat,Math.cos(a)*r*.48,level-.55,Math.sin(a)*r*.48);branch.rotation.z=Math.sin(a)*-.75;branch.rotation.x=Math.cos(a)*.75;
-const crown=mesh(g,leafGeo,leafMats[(tone+k)%leafMats.length],Math.cos(a)*r,level+.5,Math.sin(a)*r,1.7+(k%3)*.22,1.4+(k%2)*.35,1.6+(k%3)*.2);crown.rotation.set(k*.27,a,k*.19);crown.castShadow=k<3}
-mesh(g,leafGeo,leafMats[tone],0,7.6,0,2.05,2.05,1.9);decor.push(g)}
+// Drei deterministische Baumtypen mit geteilten Geometrien: Eiche, schlanke Birke, Nadelbaum.
+const trunkGeo=new TH.CylinderGeometry(.26,.46,5.6,9),branchGeo=new TH.CylinderGeometry(.09,.2,2.8,7);
+const leafGeo=new TH.IcosahedronGeometry(1,1),pineGeo=new TH.ConeGeometry(1,2.4,9);
+const birchBark=mat('#a8a79a',.02,.96),pineBark=mat('#504336',.02,.98);
+const pineLeaves=[mat('#31584a',.01,.98),mat('#41694f',.01,.98)];
+function tree(x,z,s=1){
+const seed=Math.abs(Math.floor(x*23+z*41)),species=seed%9<5?'oak':seed%9<7?'birch':'pine';
+const g=new TH.Group();g.position.set(x,0,z);g.scale.setScalar(s*(species==='birch'?.92:1));world.add(g);
+const tone=seed%leafMats.length,bark=species==='birch'?birchBark:species==='pine'?pineBark:barkMat;
+const lean=Math.sin(seed*.37)*.075;
+const trunk=mesh(g,trunkGeo,bark,0,2.8,0);trunk.rotation.z=lean;
+if(species==='pine'){
+for(let k=0;k<5;k++){
+const y=3.2+k*.95,scale=1-k*.15;
+const tier=mesh(g,pineGeo,pineLeaves[(seed+k)%2],0,y,0,2.2*scale,1.08,2.2*scale);
+tier.rotation.y=k*.43+seed*.07;tier.castShadow=k<2}
+}else{
+const branchCount=species==='birch'?5:8;
+for(let k=0;k<branchCount;k++){
+const a=k*2.399963+seed*.11,level=3.4+(k%4)*.92;
+const reach=species==='birch'?.8:1.45+(k%2)*.18;
+const branch=mesh(g,branchGeo,bark,Math.cos(a)*reach*.4,level-.5,Math.sin(a)*reach*.4);
+branch.rotation.z=Math.sin(a)*-.66;branch.rotation.x=Math.cos(a)*.66;
+const crown=mesh(g,leafGeo,leafMats[(tone+k)%leafMats.length],Math.cos(a)*reach,level+.48,Math.sin(a)*reach,
+species==='birch'?1.05:1.6+(k%3)*.19,species==='birch'?1.6:1.3+(k%2)*.28,species==='birch'?1.02:1.55);
+crown.rotation.set(k*.21,a,k*.17);crown.castShadow=k<2}
+mesh(g,leafGeo,leafMats[tone],0,species==='birch'?7.4:7.5,0,species==='birch'?1.1:1.9,1.7,species==='birch'?1.15:1.75);
+if(species==='birch')for(let j=0;j<4;j++){
+const scar=box(g,pineBark,Math.sin(j*2.3)*.27,1.1+j*.9,Math.cos(j*2.3)*.27,.22,.08,.08);scar.rotation.y=j*2.3}
+}
+decor.push(g)
+}
 function rock(x,z,s=1){const a=mesh(world,new TH.DodecahedronGeometry(1,0),M.stone,x,.6*s,z,1.5*s,.9*s,1.2*s);a.rotation.y=rand()*6}
 function house(x,z,scale=1,style=0){const g=new TH.Group();g.position.set(x,0,z);g.scale.setScalar(scale);world.add(g);box(g,M.stone2,0,.5,0,10,1,9);box(g,M.wall,0,4.3,0,9.5,7,8.5);const roofMat=style?M.red:M.roof;const left=box(g,roofMat,-2.5,9.3,0,6.8,.85,11.5);left.rotation.z=-.55;const right=box(g,roofMat,2.5,9.3,0,6.8,.85,11.5);right.rotation.z=.55;box(g,M.wood,0,2.5,4.36,2.4,4,.3);for(const xx of [-3,3]){box(g,M.wood,xx,5.1,4.38,1.7,2.3,.25);box(g,M.glow,xx,5.1,4.55,1.1,1.7,.12);box(g,M.wood,xx,5.1,4.7,.12,2,.12);box(g,M.wood,xx,5.1,4.7,1.5,.12,.12)}for(const xx of [-4.3,4.3])for(const zz of [-3.8,3.8])box(g,M.wood,xx,4.3,zz,.5,7.8,.5);return g}
 function tower(x,z,h=22){const g=new TH.Group();g.position.set(x,0,z);world.add(g);cyl(g,M.stone2,0,h/2,0,4.5,h);cone(g,M.roof,0,h+4,0,6,9);for(let j=0;j<8;j++){const a=j*Math.PI/4;box(g,M.stone,Math.cos(a)*4.6,h-1,Math.sin(a)*4.6,1.4,3,1.4)}return g}
