@@ -49,11 +49,12 @@ for(let i=0;i<780;i++){const theta=starRand()*Math.PI*2,phi=Math.acos(starRand()
 starGeo.setAttribute('position',new TH.BufferAttribute(starPositions,3));
 const stars=new TH.Points(starGeo,new TH.PointsMaterial({color:'#e8eaff',size:1.4,sizeAttenuation:false,transparent:true,opacity:0,depthWrite:false}));scene.add(stars);
 const nightLanterns=new TH.Group();scene.add(nightLanterns);
+const moonlightColor=new TH.Color('#91a7d1'),daylightColor=new TH.Color('#fff0cb'),sunsetColor=new TH.Color('#ffba82');
 function updateSky(t){const phase=(t*.000012+1.1)%(Math.PI*2),height=Math.sin(phase),day=TH.MathUtils.smoothstep(height,-.17,.32),twilight=1-Math.min(1,Math.abs(height)*2.8);
 scene.background.copy(nightSky).lerp(daylightSky,day).lerp(twilightSky,twilight*.4);scene.fog.color.copy(scene.background);
 // Schritt 3: wärmere Abendsonne, kühler Mondschein und sanftere Schatten.
 sun.intensity=.25+day*2.35;skyLight.intensity=.16+day*.5;
-sun.color.copy(new TH.Color('#91a7d1')).lerp(new TH.Color('#fff0cb'),day).lerp(new TH.Color('#ffba82'),twilight*.32);
+sun.color.copy(moonlightColor).lerp(daylightColor,day).lerp(sunsetColor,twilight*.32);
 sun.position.set(hero.position.x+Math.cos(phase)*85,55+Math.max(0,height)*50,hero.position.z+Math.sin(phase)*65);
 sun.target.position.set(hero.position.x,0,hero.position.z);sun.target.updateMatrixWorld();
 renderer.toneMappingExposure=1.02+day*.2;
@@ -634,7 +635,7 @@ arm.userData.forearm.rotation.x=smoothJoint(arm.userData.forearm.rotation.x,-.14
 }
 function animate(t){requestAnimationFrame(animate);updateSky(t);for(let i=floatingHits.length-1;i>=0;i--){const f=floatingHits[i],p=(t-f.start)/850;if(p>=1){scene.remove(f.sprite);f.sprite.material.dispose();f.tex.dispose();floatingHits.splice(i,1)}else{f.sprite.position.set(f.x,3.8+p*2.4,f.z);f.sprite.material.opacity=1-p}}
 for(const m of mobs)if(m.alive&&m.barGroup){m.barGroup.quaternion.copy(camera.quaternion);m.barGroup.visible=hero.position.distanceTo(m.mesh.position)<35}if(t-minimapTick>140){minimapTick=t;refreshMMO()}const dt=Math.min(.05,(t-(animate.last||t))/1000);animate.last=t;move(dt,t);updateSpells(t,dt);for(const m of mobs)if(m.alive){if(m.aura)m.aura.rotation.z=t*.0007;m.mesh.userData.body.position.y=Math.sin(t*.0015+m.phase)*.07;if(!opened&&hero.position.distanceTo(m.mesh.position)<2.4&&Math.floor(t/1700)!==Math.floor((t-dt*1000)/1700)){state.hp=Math.max(1,state.hp-Math.max(1,8-Math.floor(stats().defense/15)));if(state.hp<=1){state.hp=stats().maxhp;hero.position.set(0,0,25);toast('💀 Du erwachst in Sonnenhain.')}hud()}}for(const n of npcs)n.marker.position.y=5.7+Math.sin(t*.003+n.x)*.3;for(const chest of treasureChests)if(!chest.opened){chest.glow.position.y=1.53+Math.sin(t*.003+chest.id)*.18;chest.glow.rotation.y=t*.001}portalGlow.material.opacity=.4+Math.sin(t*.002)*.18;
-if(hero.userData.rune)hero.userData.rune.rotation.z=Math.sin(t*.0016)*.18;hero.userData.capeMesh.rotation.y=Math.sin(t*.003)*.08;hero.userData.capeMesh.rotation.x=-.14-(walking?.18:0);
+if(hero.userData.rune)hero.userData.rune.rotation.z=Math.sin(t*.0016)*.18;hero.userData.capeMesh.rotation.y=Math.sin(t*.003)*.08;hero.userData.capeMesh.rotation.x=TH.MathUtils.damp(hero.userData.capeMesh.rotation.x,-.14-Math.min(1,locomotion.speed/5)*.18,6,dt);
 const attackProgress=Math.max(0,1-(attackAt-t)/550);
 if(t<attackAt&&attackProgress>.01&&attackProgress<1){hero.userData.arms[0].rotation.x=-1.3+Math.sin(attackProgress*Math.PI)*-.95;hero.userData.arms[0].rotation.z=-.35;hero.userData.body.rotation.y=Math.sin(attackProgress*Math.PI)*-.14}else{hero.userData.body.rotation.y=TH.MathUtils.lerp(hero.userData.body.rotation.y,0,Math.min(1,dt*9))}if(hero.userData.wingHalo)hero.userData.wingHalo.rotation.z=t*.00035;if(hero.userData.swordAura)hero.userData.swordAura.rotation.y=t*.001;
 for(const b of butterflies){b.mesh.position.x=b.x+Math.sin(t*.0007+b.phase)*2.3;b.mesh.position.z=b.z+Math.cos(t*.0006+b.phase)*1.7;b.mesh.position.y=1.7+Math.sin(t*.002+b.phase)*.65;b.mesh.rotation.y=t*.0007+b.phase;b.mesh.scale.x=.65+Math.abs(Math.sin(t*.024+b.phase))*.7}
