@@ -48,3 +48,27 @@ Ein vollständig kostenloses, deutschsprachiges, WoW-inspiriertes Browser-3D-Fan
 - Direkte JS-Syntax-/Funktions-/Unveröffentlicht-Prüfungen wurden erfolgreich ausgeführt. **Keine vollständige Browser- oder Grafikabnahme erfolgt.**
 - Qualitätskriterien für eine spätere Freigabe: (1) Keine Browserkonsolenfehler beim Start, (2) neue und bestehende Speicherstände, (3) PC-/Mobilsteuerung, (4) alle Kernmenüs, §34a-Fragen, Inventar/Equipment, Quests, Händler, Boss, Dungeon, (5) flüssige Framerate auf Zielgeräten, (6) vom Nutzer abgenommene Charakter-/Rüstungsgrafik nach Vorlagen, (7) nur kostenlos nutzbare und sauber lizenzierte Assets.
 - Keine Behauptung, ein 100% fertiges MMO sei schon erreicht. Keine öffentliche Test-URL zum Spielen empfehlen, solange gesperrt.
+
+## Grafik-Neustart: verbindlicher Arbeitsplan
+**Ziel:** Nicht weitere Deko und Effekte, sondern ein durchgängig stimmiger, kostenloser MMORPG-Look entsprechend den Nutzerreferenzen. Öffentliche Seiten bleiben bis zur Freigabe gesperrt.
+
+### Meilenstein A – Referenzheld (höchste Priorität)
+- Ein hochwertiger, humanoider Held mit natürlicher Silhouette, sauber getrennten Materialien und sichtbar getragenem kompletten Rüstungsset.
+- Ein in sich geschlossenes Wächter-Rüstungsset (Helm, Torso, Schultern, Handschuhe, Beine, Stiefel, Waffe, Umhang). Später weitere Sets.
+- Saubere GLB/GLTF-Assets und AnimationMixer, wenn geeignete überprüft lizenzierte kostenlose Modelle verfügbar sind. Lizenz in `ASSET-LICENSES.md` dokumentieren.
+- Mindestens Idle, Walk, Run, Attack, Hit, Death; kein unbeabsichtigtes Clipping durch Flügel/Schwert.
+- Charakter in geschlossener lokaler Testumgebung auf PC und Smartphone von vorne, hinten und seitlich kontrollieren.
+
+### Meilenstein B – Referenzgebiet
+- Ein kompaktes, hochwertiges Wald-/Burggebiet mit natürlicher Vegetation, konsistenten Materialien und klaren Wegen.
+- Reduzierte magische Dauer-Effekte; atmosphärische Beleuchtung, passende Schatten, Gelände und Sichtweite.
+- Instancing und LOD, damit Mobilgeräte nicht überlastet werden.
+
+### Meilenstein C – Geschlossene spielbare Strecke
+- Start -> NPC -> §34a-Frage -> Quest -> Gegner -> Beute -> Ausrüsten -> Boss -> Abschluss.
+- Spielstand neu/alt, Keyboard, Touch, Inventar und alle Menüpfade prüfen.
+- Automatische Tests ergänzen; Browser-Laufzeittest und Screenshots mit realem Spiel, nicht mit Konzeptbildern.
+
+### Freigaberegel
+- Erst nach vollständig bestandener Funktions- und Grafikabnahme, dokumentierten Asset-Lizenzen und ausdrücklicher Freigabe des Nutzers die öffentliche Seite wieder öffnen.
+- Keine kostenpflichtigen Assets, Dienste, Echtgeldkäufe oder Abos.
