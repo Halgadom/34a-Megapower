@@ -204,9 +204,34 @@ const gauntlets=g.userData.gauntlets||arms.map(a=>{const mount=new TH.Group();a.
 const shoulderMounts=g.userData.shoulderMounts||arms.map(a=>{const mount=new TH.Group();a.add(mount);return mount});g.userData.shoulderMounts=shoulderMounts;
 const heldSwordMount=g.userData.heldSwordMount||new TH.Group();if(!g.userData.heldSwordMount)arms[0].userData.forearm.add(heldSwordMount);g.userData.heldSwordMount=heldSwordMount;
 const chest=equipped('chest'),helm=equipped('helm'),gloves=equipped('gloves'),boots=equipped('boots'),blade=equipped('weapon'),wing=equipped('wings'),companion=equipped('pet');
+const armorTheme=chest?(chest.name.includes('Drachen')?'dragon':g.userData.heroClass==='Waldläufer'?'ranger':g.userData.heroClass==='Arkanist'?'arcane':'guardian'):'guardian';
+const themeColors={dragon:['#752d30','#e7a94c'],ranger:['#365747','#a7bd86'],arcane:['#39446d','#8cccf2'],guardian:['#344b65','#e4bd79']};
+const theme=themeColors[armorTheme],themeMetal=mat(theme[0],.72,.28),themeAccent=mat(theme[1],.75,.25);
+
 if(g.userData.hairRoot)g.userData.hairRoot.visible=!helm;
 const gem=(p,x,y,z,c,r=.18)=>{const a=mesh(p,new TH.OctahedronGeometry(1),c,x,y,z,r,r*1.5,r);a.rotation.y=.4;return a};
 if(chest){const c=enchantedMaterial(chest.rarity),dark=mat('#243342',.4,.55),trim=chest.rarity>=3?M.gold:M.iron;mesh(armor,new TH.CylinderGeometry(.84,.65,1.75,12),c,0,2.25,.06,1,1,.83);mesh(armor,new TH.CylinderGeometry(.72,.58,1.3,12),dark,0,2.25,.25,1,1,.8);box(armor,trim,0,2.84,.79,1.42,.16,.15);box(armor,trim,0,1.66,.8,1.5,.16,.14);box(armor,trim,0,2.28,.8,.12,1.12,.14);for(const x of [-1,1]){const mount=shoulderMounts[x===-1?0:1];const shoulder=sphere(mount,c,x*.22,-.07,0,.55);shoulder.scale.set(1.3,.72,1.2);cone(mount,trim,x*.36,.36,0,.22,.85);box(armor,c,x*.42,1.15,.05,.53,.67,.7)}gem(armor,0,2.42,.88,mat(colors[chest.rarity],.2,.1),.22+chest.rarity*.03);if(chest.rarity>=3){for(const x of [-.7,.7]){const spike=cone(armor,trim,x,3.18,-.1,.2,.95);spike.rotation.z=x*.4}}if(chest.name.includes('Drachen')){for(const x of [-1,1]){cone(armor,M.gold,x*1.4,3.45,-.2,.23,1.25);box(armor,M.red,x*.4,2.2,.82,.13,.85,.14)}}}
+// Vier eigenständige Silhouetten, nicht bloß andere Rüstungsfarben.
+if(chest){
+if(armorTheme==='dragon'){
+for(const side of [-1,1]){const mount=shoulderMounts[side===-1?0:1];
+for(let j=0;j<3;j++){const scale=1-j*.22;const scaleSpike=cone(mount,j===0?themeAccent:themeMetal,side*(.35+j*.2),.48-j*.22,-.15,.2*scale,.95*scale);scaleSpike.rotation.z=side*(.32+j*.24)}
+const fang=cone(armor,themeAccent,side*.42,1.66,.84,.15,.58);fang.rotation.z=side*.2}
+}else if(armorTheme==='ranger'){
+for(const side of [-1,1]){const mount=shoulderMounts[side===-1?0:1];
+for(let j=0;j<3;j++){const leaf=mesh(mount,new TH.ConeGeometry(.22,.83-j*.12,5),j===0?themeAccent:themeMetal,side*(.23+j*.17),.13-j*.2,.22);leaf.rotation.z=side*(.72+j*.14)}
+const tabard=mesh(armor,new TH.ConeGeometry(.23,.92,5),themeMetal,side*.38,1.23,.58);tabard.rotation.z=side*.2}
+}else if(armorTheme==='arcane'){
+for(const side of [-1,1]){const mount=shoulderMounts[side===-1?0:1];
+const crystal=mesh(mount,new TH.OctahedronGeometry(.4),themeAccent,side*.24,.31,.06,.8,1.4,.75);
+for(let j=0;j<3;j++){const rune=mesh(armor,new TH.OctahedronGeometry(.09),themeAccent,side*.48,2.65-j*.32,.92);rune.rotation.z=j*.4}}
+const pendant=mesh(armor,new TH.OctahedronGeometry(.22),themeAccent,0,2.52,1.03);
+}else{
+for(const side of [-1,1]){const mount=shoulderMounts[side===-1?0:1];
+const crest=mesh(mount,new TH.BoxGeometry(.12,.52,.12),themeAccent,side*.42,.12,.47);crest.rotation.z=side*.25;
+const skirt=box(armor,themeMetal,side*.39,1.25,.38,.44,.62,.43);skirt.rotation.z=side*.12}
+const insignia=mesh(armor,new TH.OctahedronGeometry(.19),themeAccent,0,2.53,1.05);
+}}
 if(chest&&chest.rarity>=2){const inlay=mat(chest.rarity>=4?'#e6b957':'#83b8d9',.7,.24);for(const side of [-1,1]){const edge=box(armor,inlay,side*.73,2.25,.77,.1,1.2,.12);edge.rotation.z=side*.17;for(let j=0;j<3;j++){const stud=sphere(armor,inlay,side*.76,2.68-j*.38,.85,.09);stud.scale.z=.55}}}
 if(chest&&chest.rarity>=4){const rune=new TH.Group();rune.position.set(0,2.48,.91);armor.add(rune);const ink=new TH.MeshBasicMaterial({color:colors[chest.rarity]});for(let j=0;j<4;j++){const a=j*Math.PI/2;const bar=box(rune,ink,Math.cos(a)*.24,Math.sin(a)*.24,0,.08,.38,.055);bar.rotation.z=-a}const center=mesh(rune,new TH.OctahedronGeometry(.17),ink,0,0,.08);g.userData.rune=rune}
 if(chest){const metal=enchantedMaterial(chest.rarity),trim=chest.rarity>=3?M.gold:M.iron;
@@ -259,7 +284,7 @@ if(kind==='hero'){g.userData.cloak=g.userData.capeMesh}
 return g};
 // Drei kostenlos prozedural erzeugte Rüstungsstile – visuell nach Klasse und Seltenheit.
 const classPalette={Wächter:'#c8a56c',Waldläufer:'#76a887',Arkanist:'#8f86d2'};
-function styleHero(){const cloth=classPalette[state.class]||'#9aa7b5';materials.cloth.color.set(cloth);const cape=hero.userData.cloak;if(cape)cape.material.color.set(state.class==='Waldläufer'?'#426a4b':state.class==='Arkanist'?'#4e3d7a':'#354f68')}
+function styleHero(){hero.userData.heroClass=state.class;const cloth=classPalette[state.class]||'#9aa7b5';materials.cloth.color.set(cloth);const cape=hero.userData.cloak;if(cape)cape.material.color.set(state.class==='Waldläufer'?'#426a4b':state.class==='Arkanist'?'#4e3d7a':'#354f68')}
 // Seltenheitsabhängige Materialeffekte für die getragenen Ausrüstungsteile.
 function enchantedMaterial(rarity){const color=colors[Math.max(0,Math.min(5,rarity))];return new TH.MeshStandardMaterial({color,metalness:.82,roughness:.22,emissive:color,emissiveIntensity:rarity>=5?.28:rarity>=4?.15:rarity>=3?.07:0})}
 // Kostenlos erzeugte atmosphärische Fantasy-Partikel und Schwebestaub.
