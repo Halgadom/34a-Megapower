@@ -28,3 +28,5 @@ test('Forest undergrowth uses instancing and preserves road clearings',()=>{for(
 test('Forest trees have distinct oak birch and pine silhouettes',()=>{for(const token of ["species=seed%9<5?'oak'","species==='birch'","species==='pine'","const pineGeo=new TH.ConeGeometry","const birchBark=mat","const pineLeaves="])assert.ok(js.includes(token),token)});
 
 test('Forest terrain roads light and castle approach are implemented',()=>{for(const token of ['const groundPatches=new TH.Group()','new TH.InstancedMesh(patchGeo,patchMat,460)','const pathEdgeMat=','function path(x,z,w,d)','sun.color.copy(new TH.Color','renderer.toneMappingExposure=1.02+day*.2','function castleApproach()','castleApproach();'])assert.ok(js.includes(token),token)});
+
+test('Castle towers have architectural layers and trees have buttress roots',()=>{for(const token of ['const castleWindowMat=','for(const y of [h*.35,h*.7,h-.8])','const crenel=box(g','for(let root=0;root<3;root++)','const buttress=mesh(g'])assert.ok(js.includes(token),token)});
