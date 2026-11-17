@@ -24,3 +24,5 @@ test('Hero silhouette has shaped torso, limbs and layered cuirass',()=>{for(cons
 test('Four distinct armor themes have geometry and use saved class',()=>{for(const token of ["armorTheme==='dragon'","armorTheme==='ranger'","armorTheme==='arcane'","const themeColors=","state.class==='Waldläufer'","state.class==='Arkanist'"])assert.ok(js.includes(token),token)});
 
 test('Forest undergrowth uses instancing and preserves road clearings',()=>{for(const token of ['const forestFloor=new TH.Group()','const foliageShape=new TH.Shape()','function forestClearing(x,z)','new TH.InstancedMesh(foliageGeo,leafMat,650)','new TH.InstancedMesh(shrubGeo','forestFloor.add(shrubs)'])assert.ok(js.includes(token),token)});
+
+test('Forest trees have distinct oak birch and pine silhouettes',()=>{for(const token of ["species=seed%9<5?'oak'","species==='birch'","species==='pine'","const pineGeo=new TH.ConeGeometry","const birchBark=mat","const pineLeaves="])assert.ok(js.includes(token),token)});
