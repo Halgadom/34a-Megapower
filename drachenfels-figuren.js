@@ -1,0 +1,23 @@
+/* Drachenfels – hand-crafted isometric fantasy character art. No network, no paid assets. */
+(()=>{'use strict';const P=Math.PI;
+function fill(g,p,c){g.fillStyle=c;g.beginPath();p.forEach((v,i)=>i?g.lineTo(v[0],v[1]):g.moveTo(v[0],v[1]));g.closePath();g.fill()}
+function stroke(g,p,c,w=2){g.beginPath();p.forEach((v,i)=>i?g.lineTo(...v):g.moveTo(...v));g.lineCap='round';g.lineJoin='round';g.lineWidth=w;g.strokeStyle=c;g.stroke()}
+function oval(g,x,y,rx,ry,c){g.beginPath();g.ellipse(x,y,rx,ry,0,0,P*2);g.fillStyle=c;g.fill()}
+function jewel(g,x,y,r,c){oval(g,x,y,r+3,r+3,'#d9c69c');oval(g,x,y,r,r,c);oval(g,x-r/3,y-r/3,r/3,r/3,'#fff9dc')}
+function draw(g,x,y,kind,scale,klass,items,time){g.save();g.translate(x,y);g.scale(scale,scale);const moving=kind==='hero'&&window.DrachenfelsMoving;const bob=moving?Math.sin(time*.014)*2:Math.sin(time*.002+x*.13)*.7;g.translate(0,bob);const foe=kind==='mob',boss=kind==='boss',npc=kind==='npc',shop=kind==='shop';const mage=klass==='mage',ranger=klass==='ranger';const coat=foe?'#615c67':boss?'#613d64':npc?'#77764f':shop?'#8b684d':mage?'#535a91':ranger?'#3d6d54':'#476d84';const gold='#ddc18a',steel='#a7b9bb',skin=foe?'#8fae9e':boss?'#c3a6bd':'#d9b08b';
+oval(g,3,7,34,12,'#071e286b');if(!foe&&!shop&&!npc){fill(g,[[-20,-67],[-40,-23],[-39,0],[40,0],[36,-26],[20,-67]],mage?'#473e79':ranger?'#285d4d':'#a04f54');stroke(g,[[-34,-5],[-12,-17],[6,-9],[33,-21]],'#d4b58d66',2)}
+const walk=moving?Math.sin(time*.014)*5:0;
+fill(g,[[-16,-31],[-19+walk,2],[-3+walk,2],[2,-31]],'#2b3540');fill(g,[[4,-31],[3-walk,2],[18-walk,2],[18,-31]],'#303b44');fill(g,[[-20+walk,-5],[-21+walk,6],[-1+walk,6],[0+walk,-5]],'#4b4240');fill(g,[[1-walk,-5],[2-walk,6],[22-walk,6],[20-walk,-5]],'#4b4240');
+fill(g,[[-21,-83],[-26,-38],[-16,-25],[17,-25],[27,-38],[21,-83]],coat);fill(g,[[-16,-78],[0,-71],[16,-78],[13,-39],[0,-30],[-13,-39]],'#e9f4ed18');stroke(g,[[-18,-77],[0,-70],[18,-77]],gold,2);stroke(g,[[-17,-37],[17,-37]],'#e1c596',5);jewel(g,0,-37,3,'#3d9bba');
+fill(g,[[-23,-84],[-37,-78],[-36,-59],[-19,-56],[-12,-75]],steel);fill(g,[[23,-84],[37,-78],[36,-59],[19,-56],[12,-75]],steel);stroke(g,[[-31,-73],[-25,-67]],'#edf2e1',3);stroke(g,[[25,-67],[31,-73]],'#edf2e1',3);
+fill(g,[[-32,-62],[-39,-34],[-29,-28],[-22,-59]],skin);fill(g,[[32,-62],[39,-34],[29,-28],[22,-59]],skin);oval(g,-33,-29,8,8,'#6d7779');oval(g,33,-29,8,8,'#6d7779');
+oval(g,0,-105,20,24,skin);oval(g,-19,-106,5,9,skin);oval(g,19,-106,5,9,skin);
+fill(g,[[-21,-116],[-19,-131],[-7,-140],[12,-135],[23,-118],[19,-108],[9,-120],[-8,-116],[-18,-108]],foe?'#4a4d4a':boss?'#443449':'#4d3e3b');stroke(g,[[-11,-108],[-5,-109]],'#35414b',2);stroke(g,[[5,-109],[11,-108]],'#35414b',2);stroke(g,[[-4,-92],[1,-90],[6,-93]],'#936b5a',1.5);
+if(!foe&&!shop&&!npc){fill(g,[[-24,-118],[-28,-135],[-15,-148],[0,-153],[15,-148],[28,-135],[24,-118]],mage?'#4c4d86':ranger?'#3b644e':'#71858c');fill(g,[[-20,-128],[0,-144],[20,-128]],mage?'#7870b0':ranger?'#648b63':'#aab8b5');stroke(g,[[-22,-125],[22,-125]],gold,3);jewel(g,0,-139,5,mage?'#bd9dff':ranger?'#74c2a4':'#58b3c6')}
+if(boss){fill(g,[[-23,-124],[-20,-149],[-6,-135],[0,-162],[9,-135],[23,-149],[24,-124]],'#d3b475');jewel(g,0,-144,5,'#b94872');fill(g,[[-32,-75],[-48,-12],[-17,-17]],'#513b58')}
+if(shop){fill(g,[[-22,-87],[-31,-35],[31,-35],[22,-87]],'#b18a54');stroke(g,[[-21,-65],[21,-65]],gold,5)}
+if(npc){fill(g,[[-20,-85],[-29,-33],[29,-33],[20,-85]],'#bca06b');stroke(g,[[-18,-49],[18,-49]],gold,4)}
+if(kind==='hero'){if(mage){stroke(g,[[39,-9],[41,-113]],'#ad9270',6);jewel(g,41,-123,12,'#ab94ed');oval(g,41,-123,19,19,'#a8a0ff32')}else if(ranger){stroke(g,[[34,-98],[52,-63],[35,-27]],'#c09b61',4);stroke(g,[[34,-98],[35,-27]],'#e7d6a9',1.5);stroke(g,[[40,-64],[72,-64]],'#e8d6a0',3);fill(g,[[72,-64],[62,-69],[62,-59]],steel)}else{fill(g,[[25,-79],[50,-95],[70,-72],[68,-32],[42,-17],[23,-39]],steel);fill(g,[[33,-73],[51,-84],[61,-68],[60,-39],[43,-28],[32,-43]],'#477a92');stroke(g,[[45,-75],[48,-34]],gold,3);jewel(g,48,-55,8,'#e2c98e')}if(items.includes('Runenklinge')){stroke(g,[[-40,-29],[-53,-122]],'#d5e8e8',7);stroke(g,[[-53,-122],[-58,-143]],'#b7eff2',4);stroke(g,[[-69,-113],[-40,-113]],gold,5)}}
+g.restore()}
+window.DrachenfelsArtV2={draw};
+})();
