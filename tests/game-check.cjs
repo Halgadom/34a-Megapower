@@ -22,3 +22,5 @@ test('Character face and hair react to helmets',()=>{for(const token of ['const 
 test('Hero silhouette has shaped torso, limbs and layered cuirass',()=>{for(const token of ['new TH.LatheGeometry(torsoProfile,20)','new TH.LatheGeometry(vestProfile,20)','const pelvis=mesh(body','const chestContour=mesh(body','const panelShape=new TH.Shape()'])assert.ok(js.includes(token),token)});
 
 test('Four distinct armor themes have geometry and use saved class',()=>{for(const token of ["armorTheme==='dragon'","armorTheme==='ranger'","armorTheme==='arcane'","const themeColors=","state.class==='Waldläufer'","state.class==='Arkanist'"])assert.ok(js.includes(token),token)});
+
+test('Forest undergrowth uses instancing and preserves road clearings',()=>{for(const token of ['const forestFloor=new TH.Group()','const foliageShape=new TH.Shape()','function forestClearing(x,z)','new TH.InstancedMesh(foliageGeo,leafMat,650)','new TH.InstancedMesh(shrubGeo','forestFloor.add(shrubs)'])assert.ok(js.includes(token),token)});
