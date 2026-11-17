@@ -20,3 +20,5 @@ test('Locomotion uses delta-time blending and smooth articulated joints',()=>{fo
 test('Character face and hair react to helmets',()=>{for(const token of ['const hairRoot=new TH.Group()','g.userData.hairRoot.visible=!helm','const mouth=mesh(body','const nostril=sphere(body','head,hairRoot,torso'])assert.ok(js.includes(token),token)});
 
 test('Hero silhouette has shaped torso, limbs and layered cuirass',()=>{for(const token of ['new TH.LatheGeometry(torsoProfile,20)','new TH.LatheGeometry(vestProfile,20)','const pelvis=mesh(body','const chestContour=mesh(body','const panelShape=new TH.Shape()'])assert.ok(js.includes(token),token)});
+
+test('Four distinct armor themes have geometry and use saved class',()=>{for(const token of ["armorTheme==='dragon'","armorTheme==='ranger'","armorTheme==='arcane'","const themeColors=","state.class==='Waldläufer'","state.class==='Arkanist'"])assert.ok(js.includes(token),token)});
