@@ -38,3 +38,5 @@ test('Five castle courtyard upgrades are present',()=>{for(const token of ['cons
 test('Castle NPC services and persistent guard quest are wired',()=>{for(const token of ["name:'Burgschmied Rurik'","name:'Marktfrau Selma'","name:'Wirtin Mira'","name:'Burgwache Leona'","if(nearest.type==='tavern')","if(type==='tavern')","if(type==='castleQuest')","state.quests.castleWatch=true"])assert.ok(js.includes(token),token)});
 
 test('Cape animation is damped and sky colors are reused',()=>{for(const token of ["TH.MathUtils.damp(hero.userData.capeMesh.rotation.x","const moonlightColor=new TH.Color","sun.color.copy(moonlightColor)"])assert.ok(js.includes(token),token);assert.ok(!js.includes("hero.userData.capeMesh.rotation.x=-.14-(walking?.18:0)"))});
+
+test('Equipment rebuild disposes temporary GPU resources',()=>{for(const token of ['const obsoleteGeometries=new Set()','const obsoleteMaterials=new Set()','group.traverse(object=>','geometry.dispose()','material.dispose()','protectedGearMaterials.has(material)'])assert.ok(js.includes(token),token)});
