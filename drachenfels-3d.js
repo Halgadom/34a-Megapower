@@ -62,8 +62,37 @@ const save=()=>{try{localStorage.setItem('drachenfels-3d-save',JSON.stringify(st
 const equipped=slot=>state.bag.find(i=>i.id===state.equip[slot]);
 const stats=()=>{let attack=12+state.level*3+state.talents.power*5,defense=0;for(const i of state.bag)if(state.equip[i.slot]===i.id){attack+=i.attack+i.upgrade*3;defense+=i.defense+i.upgrade*2}return{attack,defense,maxhp:150+state.level*20+state.talents.health*25}};
 const materials={skin:mat('#d5a17c'),hair:mat('#40372e'),cloth:mat('#38586b'),pants:mat('#353c46'),armor:mat('#9aaeb9',.7,.35),eye:mat('#202a31'),trim:mat('#e1c17b',.7,.3)};
-function makeCharacter(kind='hero'){const g=new TH.Group();const body=new TH.Group();g.add(body);box(body,materials.pants,-.34,.68,0,.55,1.35,.6);box(body,materials.pants,.34,.68,0,.55,1.35,.6);box(body,materials.cloth,0,2.2,0,1.5,1.75,.85);box(body,materials.skin,-1,2.25,0,.43,1.55,.5);box(body,materials.skin,1,2.25,0,.43,1.55,.5);sphere(body,materials.skin,0,3.66,0,.6);const hair=sphere(body,materials.hair,0,4.07,-.12,.59);hair.scale.set(1,.42,1);for(const x of [-.2,.2])sphere(body,materials.eye,x,3.73,.53,.065);
-const armor=new TH.Group();body.add(armor);const weapon=new TH.Group();body.add(weapon);const wings=new TH.Group();body.add(wings);const pet=new TH.Group();g.add(pet);g.userData={body,armor,weapon,wings,pet,legs:body.children.slice(0,2)};if(kind==='hero')rebuildGear(g);else{box(armor,mat(kind==='boss'?'#784568':'#6b735d'),0,2.2,.1,1.65,1.85,1);box(weapon,M.wood,-1.5,1.8,.5,.2,3,.2)}return g}
+function makeCharacter(kind='hero'){
+const g=new TH.Group(),body=new TH.Group();g.add(body);
+const skin=kind==='boss'?mat('#987fbb'):materials.skin,cloth=kind==='boss'?mat('#473b59'):materials.cloth;
+const torso=mesh(body,new TH.CylinderGeometry(.67,.52,1.52,10),cloth,0,2.35,0,1,1,.8);
+const waist=mesh(body,new TH.CylinderGeometry(.49,.48,.52,10),materials.pants,0,1.4,0);
+const legs=[],arms=[];
+for(const side of [-1,1]){
+const leg=new TH.Group();leg.position.set(side*.31,1.33,0);body.add(leg);
+mesh(leg,new TH.CylinderGeometry(.24,.19,.82,9),materials.pants,0,-.43,0);
+sphere(leg,materials.pants,0,-.84,0,.23);
+mesh(leg,new TH.CylinderGeometry(.2,.16,.7,9),materials.pants,0,-1.17,.04);
+const foot=mesh(leg,new TH.SphereGeometry(1,10,8),materials.pants,0,-1.48,.18,.25,.19,.44);
+legs.push(leg);
+const arm=new TH.Group();arm.position.set(side*.83,2.9,0);body.add(arm);
+sphere(arm,cloth,0,-.1,0,.28);
+mesh(arm,new TH.CylinderGeometry(.22,.18,.68,9),cloth,side*.08,-.44,0);
+sphere(arm,cloth,side*.11,-.78,0,.19);
+mesh(arm,new TH.CylinderGeometry(.18,.14,.6,9),skin,side*.13,-1.08,.05);
+sphere(arm,skin,side*.13,-1.43,.09,.2);
+arms.push(arm)
+}
+const neck=mesh(body,new TH.CylinderGeometry(.21,.24,.35,10),skin,0,3.2,0);
+const head=mesh(body,new TH.SphereGeometry(1,16,12),skin,0,3.66,.03,.55,.66,.51);
+const nose=mesh(body,new TH.SphereGeometry(1,8,6),skin,0,3.55,.54,.115,.15,.17);
+for(const side of [-1,1]){sphere(body,skin,side*.54,3.62,0,.14);const eye=mesh(body,new TH.SphereGeometry(1,8,6),M.white,side*.21,3.73,.5,.125,.085,.07);sphere(body,materials.eye,side*.21,3.73,.57,.055);const brow=box(body,materials.hair,side*.22,3.91,.52,.27,.045,.07);brow.rotation.z=side*.12}
+const hair=mesh(body,new TH.SphereGeometry(1,12,9),materials.hair,0,4.08,-.07,.59,.32,.56);
+for(let i=0;i<7;i++){const angle=(i-3)*.34;const lock=mesh(body,new TH.ConeGeometry(.13,.45,5),materials.hair,Math.sin(angle)*.46,3.91,Math.cos(angle)*.44,.9,1,.8);lock.rotation.z=Math.sin(angle)*.3}
+const armor=new TH.Group(),weapon=new TH.Group(),wings=new TH.Group(),pet=new TH.Group();body.add(armor,weapon,wings);g.add(pet);
+g.userData={body,armor,weapon,wings,pet,legs,arms,head,torso,headBase:3.66};
+if(kind==='hero')rebuildGear(g);else{box(armor,mat(kind==='boss'?'#784568':'#6b735d'),0,2.2,.1,1.65,1.85,1);box(weapon,M.wood,-1.5,1.8,.5,.2,3,.2)}
+return g}
 function rebuildGear(g){const {armor,weapon,wings,pet}=g.userData;for(const group of [armor,weapon,wings,pet]){while(group.children.length)group.remove(group.children[0])}
 const chest=equipped('chest'),helm=equipped('helm'),gloves=equipped('gloves'),boots=equipped('boots'),blade=equipped('weapon'),wing=equipped('wings'),companion=equipped('pet');
 const gem=(p,x,y,z,c,r=.18)=>{const a=mesh(p,new TH.OctahedronGeometry(1),c,x,y,z,r,r*1.5,r);a.rotation.y=.4;return a};
@@ -75,13 +104,11 @@ if(blade){const c=mat(colors[blade.rarity],.78,.2);box(weapon,M.wood,-1.25,1.45,
 if(wing){const c=mat(colors[wing.rarity],.25,.45);for(const x of [-1,1]){for(let j=0;j<4;j++){const f=cone(wings,c,x*(1.05+j*.43),3.15-j*.3,-.9-j*.12,.48,2.4-j*.25);f.rotation.z=x*(.45+j*.13);f.rotation.x=-.5}cone(wings,M.gold,x*1.2,3.1,-.8,.18,2.8)}}
 if(companion){const c=mat(colors[companion.rarity]);sphere(pet,c,2,.7,1.3,.68);sphere(pet,c,2,1.24,1.72,.42);for(const x of [1.7,2.3])cone(pet,M.gold,x,1.7,1.65,.2,.7);for(const x of [1.7,2.3])box(pet,c,x,.3,1.2,.22,.55,.22);const tail=cone(pet,c,2,.95,.35,.28,1.5);tail.rotation.x=-1.1}
 }
-// Natürlicherer Charakter: Schulterrundungen, Unterarme, Gürtel und animierbarer Umhang.
+// Animierbarer Stoffumhang, Gürtelschnalle und bewegliche Schultern.
 const originalMakeCharacter=makeCharacter;
 makeCharacter=function(kind='hero'){const g=originalMakeCharacter(kind),b=g.userData.body;
-const shoulderMat=kind==='hero'?materials.cloth:M.stone;
-for(const x of [-1,1]){const shoulder=sphere(b,shoulderMat,x*.88,2.9,0,.36);shoulder.scale.set(1.2,.85,1.1);const hand=sphere(b,materials.skin,x,1.48,.06,.27);hand.scale.set(.8,1.1,.8)}
-box(b,M.wood,0,1.47,.04,1.58,.25,1.0);box(b,M.gold,0,1.47,.58,.4,.34,.16);
-if(kind==='hero'){const cloak=mesh(b,new TH.PlaneGeometry(1.7,2.25),new TH.MeshStandardMaterial({color:'#354f68',side:TH.DoubleSide,roughness:.9}),0,2.02,-.62);cloak.rotation.x=-.13;g.userData.cloak=cloak}
+box(b,M.wood,0,1.48,.02,1.23,.22,.83);box(b,M.gold,0,1.48,.48,.31,.3,.15);
+if(kind==='hero'){const cloak=mesh(b,new TH.PlaneGeometry(1.5,2.2,6,9),new TH.MeshStandardMaterial({color:'#354f68',side:TH.DoubleSide,roughness:.9}),0,2.12,-.64);cloak.rotation.x=-.13;g.userData.cloak=cloak}
 return g};
 const hero=makeCharacter();scene.add(hero);hero.position.set(...state.pos);
 const mobs=[];function spawnMob(x,z,boss=false){const o=makeCharacter(boss?'boss':'mob');o.position.set(x,0,z);o.scale.setScalar(boss?1.8:1.05);scene.add(o);mobs.push({mesh:o,hp:boss?280:65+state.level*8,max:boss?280:65+state.level*8,boss,alive:true,origin:[x,z],phase:rand()*10})}
@@ -127,7 +154,7 @@ for(const it of state.bag){const b=document.createElement('button');b.className=
 details.replaceChildren();const it=state.bag.find(i=>i.id===selected);if(!it){p(details,'Wähle einen Gegenstand, um seine Werte zu sehen.');return}const h=document.createElement('h3');h.style.color=colors[it.rarity];h.textContent=icon[it.slot]+' '+it.name+' · '+tiers[it.rarity];details.append(h);p(details,'⚔️ Angriff +'+(it.attack+it.upgrade*3)+' · 🛡️ Abwehr +'+(it.defense+it.upgrade*2)+' · Verbesserung +'+it.upgrade);btn(details,'✓ Ausrüsten',()=>equip(it));if(state.equip[it.slot]===it.id)btn(details,'↩ Ablegen',()=>{delete state.equip[it.slot];rebuildGear(hero);save();render()});btn(details,'🔨 Verbessern · '+(30+it.upgrade*35)+' Gold',()=>{const cost=30+it.upgrade*35;if(state.gold<cost)return toast('Zu wenig Gold');if(it.upgrade>=10)return toast('Maximal +10');state.gold-=cost;it.upgrade++;rebuildGear(hero);save();hud();render()});btn(details,'🪙 Verkaufen · '+it.value+' Gold',()=>{if(state.bag.length<=1)return toast('Du musst einen Gegenstand behalten');state.gold+=it.value;state.bag=state.bag.filter(i=>i.id!==it.id);if(state.equip[it.slot]===it.id)delete state.equip[it.slot];selected=null;rebuildGear(hero);save();hud();render()})}
 render()}
 function create(){const d=panel('🐉 Drachenfels 3D · Charaktererstellung');p(d,'Willkommen in einer neuen kostenlosen 3D-Fantasywelt. Wähle deinen Helden.');const input=document.createElement('input');input.className='input';input.placeholder='Name deines Helden';input.maxLength=24;d.append(input);for(const c of ['Wächter','Waldläufer','Arkanist'])btn(d,'⚔️ '+c,()=>{state=fresh();state.name=input.value.trim()||'Abenteurer';state.class=c;const i=randomItem(1);i.slot='weapon';i.name=c==='Arkanist'?'Arkanstab':c==='Waldläufer'?'Waldklinge':'Wächterklinge';state.bag=[i];state.equip.weapon=i.id;hero.position.set(0,0,25);rebuildGear(hero);state.hp=stats().maxhp;save();hud();closePanel();toast('Willkommen in Drachenfels, '+state.name+'!')})}
-function move(dt,t){let x=0,z=0;if(keys.has('up')||keys.has('w')||keys.has('arrowup'))z-=1;if(keys.has('down')||keys.has('s')||keys.has('arrowdown'))z+=1;if(keys.has('left')||keys.has('a')||keys.has('arrowleft'))x-=1;if(keys.has('right')||keys.has('d')||keys.has('arrowright'))x+=1;const length=Math.hypot(x,z);walking=length>0;if(length&&!opened){const forward=new TH.Vector3(-Math.sin(yaw),0,-Math.cos(yaw)),right=new TH.Vector3(Math.cos(yaw),0,-Math.sin(yaw));const delta=forward.multiplyScalar(-z/length).addScaledVector(right,x/length);hero.position.addScaledVector(delta,Math.min(.05,dt)*9);hero.position.x=TH.MathUtils.clamp(hero.position.x,run.active?102:-170,run.active?168:170);hero.position.z=TH.MathUtils.clamp(hero.position.z,run.active?97:-170,run.active?163:170);hero.rotation.y=Math.atan2(delta.x,delta.z);state.pos=hero.position.toArray();if(Math.floor(t/1200)!==Math.floor((t-dt*1000)/1200))save()}const body=hero.userData.body;body.position.y=walking?Math.abs(Math.sin(t*.012))*.12:Math.sin(t*.002)*.025;if(hero.userData.cloak)hero.userData.cloak.rotation.x=-.13+(walking?Math.sin(t*.012)*.11:.025*Math.sin(t*.002));for(let j=0;j<2;j++)hero.userData.legs[j].rotation.x=walking?Math.sin(t*.012+j*Math.PI)*.6:0}
+function move(dt,t){let x=0,z=0;if(keys.has('up')||keys.has('w')||keys.has('arrowup'))z-=1;if(keys.has('down')||keys.has('s')||keys.has('arrowdown'))z+=1;if(keys.has('left')||keys.has('a')||keys.has('arrowleft'))x-=1;if(keys.has('right')||keys.has('d')||keys.has('arrowright'))x+=1;const length=Math.hypot(x,z);walking=length>0;if(length&&!opened){const forward=new TH.Vector3(-Math.sin(yaw),0,-Math.cos(yaw)),right=new TH.Vector3(Math.cos(yaw),0,-Math.sin(yaw));const delta=forward.multiplyScalar(-z/length).addScaledVector(right,x/length);hero.position.addScaledVector(delta,Math.min(.05,dt)*9);hero.position.x=TH.MathUtils.clamp(hero.position.x,run.active?102:-170,run.active?168:170);hero.position.z=TH.MathUtils.clamp(hero.position.z,run.active?97:-170,run.active?163:170);hero.rotation.y=Math.atan2(delta.x,delta.z);state.pos=hero.position.toArray();if(Math.floor(t/1200)!==Math.floor((t-dt*1000)/1200))save()}const body=hero.userData.body;body.position.y=walking?Math.abs(Math.sin(t*.012))*.12:Math.sin(t*.002)*.025;if(hero.userData.cloak)hero.userData.cloak.rotation.x=-.13+(walking?Math.sin(t*.012)*.11:.025*Math.sin(t*.002));for(let j=0;j<2;j++){hero.userData.legs[j].rotation.x=walking?Math.sin(t*.012+j*Math.PI)*.65:0;hero.userData.arms[j].rotation.x=walking?Math.sin(t*.012+j*Math.PI+Math.PI)*.45:Math.sin(t*.0018+j)*.025}}
 function animate(t){requestAnimationFrame(animate);const dt=Math.min(.05,(t-(animate.last||t))/1000);animate.last=t;move(dt,t);for(const m of mobs)if(m.alive){m.mesh.userData.body.position.y=Math.sin(t*.0015+m.phase)*.07;if(!opened&&hero.position.distanceTo(m.mesh.position)<2.4&&t%1700<18){state.hp=Math.max(1,state.hp-Math.max(1,8-Math.floor(stats().defense/15)));if(state.hp<=1){state.hp=stats().maxhp;hero.position.set(0,0,25);toast('💀 Du erwachst in Sonnenhain.')}hud()}}for(const n of npcs)n.marker.position.y=5.7+Math.sin(t*.003+n.x)*.3;portalGlow.material.opacity=.4+Math.sin(t*.002)*.18;
 for(const b of butterflies){b.mesh.position.x=b.x+Math.sin(t*.0007+b.phase)*2.3;b.mesh.position.z=b.z+Math.cos(t*.0006+b.phase)*1.7;b.mesh.position.y=1.7+Math.sin(t*.002+b.phase)*.65;b.mesh.rotation.y=t*.0007+b.phase;b.mesh.scale.x=.65+Math.abs(Math.sin(t*.024+b.phase))*.7}
 for(const f of fireflies){f.mesh.position.y=1.5+Math.sin(t*.0018+f.phase)*1.2;f.mesh.position.x=f.x+Math.sin(t*.0008+f.phase)*1.3;f.mesh.visible=Math.sin(t*.003+f.phase)>.1}
