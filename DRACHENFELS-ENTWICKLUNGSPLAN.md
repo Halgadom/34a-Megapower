@@ -41,3 +41,10 @@ Ein vollständig kostenloses, deutschsprachiges, WoW-inspiriertes Browser-3D-Fan
 - Beide HTML-Einstiegsseiten synchronisiert; JavaScript auf Syntax geprüft.
 - Ein generiertes Fantasy-MMO-Konzeptbild wurde als **Zielbild**, nicht als Screenshot des Spiels, im Chat erstellt.
 - **Wichtig:** Trotz großem UI-Update fehlen noch professionell animierte GLB-Charaktere und visuelle Endkontrolle. Nicht als AAA-fertig bezeichnen.
+
+## Release-Sperre und Qualitätssicherung (17.11.2026)
+- **Nutzerwunsch:** Keine weiteren unfertigen öffentlichen Spielversionen. Die Seiten `drachenfels.html` und `drachenfels-3d.html` zeigen bis zur Freigabe nur eine Entwicklungsmitteilung. Nicht ohne ausdrückliche Freigabe zurückstellen!
+- Statische Prüfsuite `tests/game-check.cjs` ergänzt und GitHub-Actions-Workflow `.github/workflows/drachenfels-quality.yml` angelegt. Beide sind im Repository; Workflow-Ergebnis und echte Browserfunktion müssen separat geprüft werden.
+- Direkte JS-Syntax-/Funktions-/Unveröffentlicht-Prüfungen wurden erfolgreich ausgeführt. **Keine vollständige Browser- oder Grafikabnahme erfolgt.**
+- Qualitätskriterien für eine spätere Freigabe: (1) Keine Browserkonsolenfehler beim Start, (2) neue und bestehende Speicherstände, (3) PC-/Mobilsteuerung, (4) alle Kernmenüs, §34a-Fragen, Inventar/Equipment, Quests, Händler, Boss, Dungeon, (5) flüssige Framerate auf Zielgeräten, (6) vom Nutzer abgenommene Charakter-/Rüstungsgrafik nach Vorlagen, (7) nur kostenlos nutzbare und sauber lizenzierte Assets.
+- Keine Behauptung, ein 100% fertiges MMO sei schon erreicht. Keine öffentliche Test-URL zum Spielen empfehlen, solange gesperrt.
