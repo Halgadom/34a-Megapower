@@ -131,23 +131,29 @@ const materials={skin:mat('#d5a17c'),hair:mat('#40372e'),cloth:mat('#38586b'),pa
 function makeCharacter(kind='hero'){
 const g=new TH.Group(),body=new TH.Group();g.add(body);
 const skin=kind==='boss'?mat('#987fbb'):materials.skin,cloth=kind==='boss'?mat('#473b59'):materials.cloth;
-const torso=mesh(body,new TH.CylinderGeometry(.67,.52,1.52,10),cloth,0,2.35,0,1,1,.8);
+// Taillierte Rumpfsilhouette statt eines gleichmäßigen Zylinders.
+const torsoProfile=[new TH.Vector2(.43,0),new TH.Vector2(.51,.18),new TH.Vector2(.5,.39),new TH.Vector2(.56,.68),new TH.Vector2(.69,1.04),new TH.Vector2(.72,1.32),new TH.Vector2(.58,1.5)];
+const torso=mesh(body,new TH.LatheGeometry(torsoProfile,20),cloth,0,1.6,0,1,1,.84);
+const chestContour=mesh(body,new TH.SphereGeometry(1,18,12),cloth,0,2.66,.02,.71,.49,.43);
+const pelvis=mesh(body,new TH.SphereGeometry(1,16,10),materials.pants,0,1.37,0,.52,.3,.38);
 const waist=mesh(body,new TH.CylinderGeometry(.49,.48,.52,10),materials.pants,0,1.4,0);
 const legs=[],arms=[];
 for(const side of [-1,1]){
 const leg=new TH.Group();leg.position.set(side*.31,1.33,0);body.add(leg);
-mesh(leg,new TH.CylinderGeometry(.24,.19,.82,9),materials.pants,0,-.43,0);
+mesh(leg,new TH.CylinderGeometry(.285,.205,.82,12),materials.pants,0,-.43,0);
+mesh(leg,new TH.SphereGeometry(1,12,8),materials.pants,0,-.23,.025,.29,.39,.28);
 sphere(leg,materials.pants,0,-.84,0,.23);
 const shin=new TH.Group();shin.position.set(0,-.84,0);leg.add(shin);
-mesh(shin,new TH.CylinderGeometry(.2,.16,.7,9),materials.pants,0,-.33,.04);
+mesh(shin,new TH.CylinderGeometry(.215,.16,.7,12),materials.pants,0,-.33,.04);
+mesh(shin,new TH.SphereGeometry(1,12,8),materials.pants,0,-.12,.12,.215,.23,.23);
 const foot=mesh(shin,new TH.SphereGeometry(1,10,8),materials.pants,0,-.64,.18,.25,.19,.44);
 leg.userData.shin=shin;legs.push(leg);
 const arm=new TH.Group();arm.position.set(side*.83,2.9,0);body.add(arm);
-sphere(arm,cloth,0,-.1,0,.28);
-mesh(arm,new TH.CylinderGeometry(.22,.18,.68,9),cloth,side*.08,-.44,0);
+mesh(arm,new TH.SphereGeometry(1,14,10),cloth,0,-.12,0,.31,.35,.3);
+mesh(arm,new TH.CylinderGeometry(.255,.19,.68,12),cloth,side*.08,-.44,0);
 sphere(arm,cloth,side*.11,-.78,0,.19);
 const forearm=new TH.Group();forearm.position.set(side*.11,-.78,0);arm.add(forearm);
-mesh(forearm,new TH.CylinderGeometry(.18,.14,.6,9),skin,side*.02,-.3,.05);
+mesh(forearm,new TH.CylinderGeometry(.21,.145,.6,12),skin,side*.02,-.3,.05);
 sphere(forearm,skin,side*.02,-.65,.09,.2);
 arm.userData.forearm=forearm;arms.push(arm)
 }
@@ -171,7 +177,14 @@ for(let j=0;j<5;j++){const strand=mesh(hairRoot,new TH.ConeGeometry(.065,.3,5),m
 // Hochwertigere Grundausstattung bleibt auch ohne Loot sichtbar.
 const underArmor=new TH.Group();body.add(underArmor);
 const leather=mat(kind==='boss'?'#4e394d':'#504b4a',.18,.8),seam=mat('#c9a56b',.55,.42);
-const vest=mesh(underArmor,new TH.CylinderGeometry(.69,.57,1.42,10),leather,0,2.33,.02,1,1,.87);
+const vestProfile=[new TH.Vector2(.55,0),new TH.Vector2(.6,.16),new TH.Vector2(.58,.4),new TH.Vector2(.65,.77),new TH.Vector2(.76,1.13),new TH.Vector2(.72,1.42)];
+const vest=mesh(underArmor,new TH.LatheGeometry(vestProfile,20),leather,0,1.62,.02,1,1,.91);
+// Stoff- und Lederbahnen geben dem Rumpf ein geschichtetes, lesbares Profil.
+for(const side of [-1,1]){
+const panelShape=new TH.Shape();panelShape.moveTo(side*.12,2.91);panelShape.lineTo(side*.61,2.83);panelShape.lineTo(side*.55,1.94);panelShape.lineTo(side*.2,1.76);panelShape.closePath();
+mesh(underArmor,new TH.ShapeGeometry(panelShape),leather,0,0,.68);
+for(let i=0;i<3;i++){const rivet=sphere(underArmor,seam,side*(.37+i*.055),2.64-i*.31,.7,.045);rivet.scale.z=.5}
+}
 for(const side of [-1,1]){const strap=box(underArmor,seam,side*.4,2.45,.57,.13,1.34,.1);strap.rotation.z=side*.17;const pad=sphere(underArmor,leather,side*.88,2.94,0,.39);pad.scale.set(1.2,.66,1.2);box(underArmor,seam,side*.89,2.94,.37,.48,.08,.12);box(underArmor,leather,side*.31,.53,.32,.47,.62,.5)}
 box(underArmor,seam,0,1.63,.61,1.27,.14,.1);const buckle=mesh(underArmor,new TH.TorusGeometry(.2,.055,6,12),seam,0,1.62,.68);buckle.rotation.z=Math.PI/2;
 // Stoffumhang mit Falten und goldener Schulterspange, unabhängig vom Beutezustand.
