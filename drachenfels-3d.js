@@ -76,6 +76,11 @@ const g=new TH.Group();g.position.set(x,0,z);g.scale.setScalar(s*(species==='bir
 const tone=seed%leafMats.length,bark=species==='birch'?birchBark:species==='pine'?pineBark:barkMat;
 const lean=Math.sin(seed*.37)*.075;
 const trunk=mesh(g,trunkGeo,bark,0,2.8,0);trunk.rotation.z=lean;
+for(let root=0;root<3;root++){
+const a=root*Math.PI*2/3+seed*.1;
+const buttress=mesh(g,new TH.ConeGeometry(.35,.95,5),bark,Math.cos(a)*.3,.3,Math.sin(a)*.3,.85,1,.9);
+buttress.rotation.z=Math.sin(a)*-.36;buttress.rotation.x=Math.cos(a)*.36;
+}
 if(species==='pine'){
 for(let k=0;k<5;k++){
 const y=3.2+k*.95,scale=1-k*.15;
@@ -112,7 +117,23 @@ block.rotation.y=side*(j%3-1)*.035;
 }
 }
 castleApproach();
-function tower(x,z,h=22){const g=new TH.Group();g.position.set(x,0,z);world.add(g);cyl(g,M.stone2,0,h/2,0,4.5,h);cone(g,M.roof,0,h+4,0,6,9);for(let j=0;j<8;j++){const a=j*Math.PI/4;box(g,M.stone,Math.cos(a)*4.6,h-1,Math.sin(a)*4.6,1.4,3,1.4)}return g}
+// Burgarchitektur: Sockel, Gesimse, Schießscharten und Zinnen statt glatter Turmzylinder.
+const castleWindowMat=mat('#273743',.06,.96),castleTrimMat=mat('#9f9f92',.04,.91);
+function tower(x,z,h=22){
+const g=new TH.Group();g.position.set(x,0,z);world.add(g);
+cyl(g,M.stone2,0,h/2,0,4.5,h);
+cyl(g,M.stone,0,.85,0,5.15,1.7);
+for(const y of [h*.35,h*.7,h-.8])cyl(g,castleTrimMat,0,y,0,4.72,.38);
+for(let level=0;level<3;level++)for(let j=0;j<8;j++){
+const a=j*Math.PI/4,y=4.4+level*(h-8)/2.5;
+const window=box(g,castleWindowMat,Math.sin(a)*4.52,y,Math.cos(a)*4.52,.42,1.5,.12);
+window.rotation.y=a;
+const sill=box(g,castleTrimMat,Math.sin(a)*4.59,y-.85,Math.cos(a)*4.59,.7,.16,.24);sill.rotation.y=a;
+}
+cone(g,M.roof,0,h+4,0,6,9);
+for(let j=0;j<12;j++){const a=j*Math.PI/6;
+const crenel=box(g,M.stone,Math.cos(a)*4.5,h+.6,Math.sin(a)*4.5,1.35,1.8,1.3);crenel.rotation.y=-a}
+return g}
 // Schritt 1: weiche Erd-/Moosübergänge an den Wegen statt nackter Rechtecke.
 const pathEdgeMat=mat('#78835c',.02,.99),pathStoneMat=mat('#8e8977',.04,.94);
 function path(x,z,w,d){
