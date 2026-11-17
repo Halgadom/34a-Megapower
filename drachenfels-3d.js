@@ -175,7 +175,8 @@ const armor=new TH.Group(),weapon=new TH.Group(),wings=new TH.Group(),pet=new TH
 g.userData={body,armor,weapon,wings,pet,cape,capeMesh,legs,arms,head,torso,headBase:3.66};
 if(kind==='hero')rebuildGear(g);else{box(armor,mat(kind==='boss'?'#784568':'#6b735d'),0,2.2,.1,1.65,1.85,1);box(weapon,M.wood,-1.5,1.8,.5,.2,3,.2)}
 return g}
-function rebuildGear(g){for(const key of ['rune','wingHalo','swordAura'])delete g.userData[key];const {armor,weapon,wings,pet}=g.userData;for(const group of [armor,weapon,wings,pet]){while(group.children.length)group.remove(group.children[0])}
+function rebuildGear(g){for(const key of ['rune','wingHalo','swordAura','heldSword'])delete g.userData[key];const {armor,weapon,wings,pet,arms,legs}=g.userData;for(const group of [armor,weapon,wings,pet,...(g.userData.gauntlets||[]),...(g.userData.greaves||[])]){while(group.children.length)group.remove(group.children[0])}
+const gauntlets=arms.map(a=>{const mount=new TH.Group();a.userData.forearm.add(mount);return mount}),greaves=legs.map(l=>{const mount=new TH.Group();l.userData.shin.add(mount);return mount});g.userData.gauntlets=gauntlets;g.userData.greaves=greaves;
 const chest=equipped('chest'),helm=equipped('helm'),gloves=equipped('gloves'),boots=equipped('boots'),blade=equipped('weapon'),wing=equipped('wings'),companion=equipped('pet');
 const gem=(p,x,y,z,c,r=.18)=>{const a=mesh(p,new TH.OctahedronGeometry(1),c,x,y,z,r,r*1.5,r);a.rotation.y=.4;return a};
 if(chest){const c=enchantedMaterial(chest.rarity),dark=mat('#243342',.4,.55),trim=chest.rarity>=3?M.gold:M.iron;mesh(armor,new TH.CylinderGeometry(.84,.65,1.75,12),c,0,2.25,.06,1,1,.83);mesh(armor,new TH.CylinderGeometry(.72,.58,1.3,12),dark,0,2.25,.25,1,1,.8);box(armor,trim,0,2.84,.79,1.42,.16,.15);box(armor,trim,0,1.66,.8,1.5,.16,.14);box(armor,trim,0,2.28,.8,.12,1.12,.14);for(const x of [-1,1]){const shoulder=sphere(armor,c,x*1.03,2.98,0,.55);shoulder.scale.set(1.3,.72,1.2);cone(armor,trim,x*1.23,3.4,0,.22,.85);box(armor,c,x*.42,1.15,.05,.53,.67,.7)}gem(armor,0,2.42,.88,mat(colors[chest.rarity],.2,.1),.22+chest.rarity*.03);if(chest.rarity>=3){for(const x of [-.7,.7]){const spike=cone(armor,trim,x,3.18,-.1,.2,.95);spike.rotation.z=x*.4}}if(chest.name.includes('Drachen')){for(const x of [-1,1]){cone(armor,M.gold,x*1.4,3.45,-.2,.23,1.25);box(armor,M.red,x*.4,2.2,.82,.13,.85,.14)}}}
@@ -188,10 +189,19 @@ for(const side of [-1,1]){const edge=mesh(armor,new TH.ConeGeometry(.22,.92,5),t
 for(let j=0;j<3;j++){const scale=1-j*.18;const layer=mesh(armor,new TH.SphereGeometry(1,12,8),metal,side*(1.05+j*.1),3.1-j*.22,.06,.66*scale,.25,.56*scale);layer.rotation.z=side*(.12+j*.14)}}
 if(chest.rarity>=3){const crest=mesh(armor,new TH.OctahedronGeometry(.25),M.glow,0,2.35,1.1,.8,1.3,.65);for(const side of [-1,1]){const ornament=mesh(armor,new TH.TorusGeometry(.35,.045,6,16,Math.PI),trim,side*.42,2.35,1.03);ornament.rotation.z=side*.7}}}
 if(helm){const c=enchantedMaterial(helm.rarity),trim=helm.rarity>=3?M.gold:M.iron;sphere(armor,c,0,4.02,0,.68);box(armor,trim,0,3.83,.61,1.06,.16,.15);box(armor,c,-.54,3.77,.05,.22,.68,.45);box(armor,c,.54,3.77,.05,.22,.68,.45);gem(armor,0,4.22,.56,trim,.18);if(helm.rarity>=2){for(const x of [-1,1]){const horn=cone(armor,trim,x*.62,4.62,-.1,.22,.9);horn.rotation.z=x*.45}}if(helm.rarity>=4)cone(armor,trim,0,4.88,0,.38,1.25)}
-if(gloves){const c=enchantedMaterial(gloves.rarity);for(const x of [-1,1]){box(armor,c,x,1.74,.04,.55,.82,.62);box(armor,M.gold,x,1.95,.38,.43,.13,.12);if(gloves.rarity>=3)cone(armor,c,x*1.08,1.3,.14,.17,.44)}}
-if(boots){const c=enchantedMaterial(boots.rarity);for(const x of [-.34,.34]){box(armor,c,x,.38,.18,.64,.78,1);box(armor,M.gold,x,.62,.7,.52,.12,.13);box(armor,c,x,.14,.54,.68,.27,.56)}}
+// Die Rüstung folgt den Gelenken, statt beim Laufen in der Luft zu schweben.
+if(gloves){const c=enchantedMaterial(gloves.rarity),trim=gloves.rarity>=3?M.gold:M.iron;for(const [i,mount] of gauntlets.entries()){const side=i===0?-1:1;
+mesh(mount,new TH.CylinderGeometry(.24,.19,.58,10),c,side*.02,-.31,.045);
+mesh(mount,new TH.CylinderGeometry(.25,.22,.13,10),trim,side*.02,-.07,.045);
+for(let j=0;j<3;j++){const ridge=box(mount,trim,side*.02,-.23-j*.12,.25,.33,.04,.055);ridge.rotation.z=side*.05}
+mesh(mount,new TH.SphereGeometry(.23,10,8),c,side*.02,-.65,.08,.9,.75,1.1)}}
+if(boots){const c=enchantedMaterial(boots.rarity),trim=boots.rarity>=3?M.gold:M.iron;for(const mount of greaves){
+mesh(mount,new TH.CylinderGeometry(.24,.18,.69,10),c,0,-.32,.05);
+mesh(mount,new TH.CylinderGeometry(.245,.21,.12,10),trim,0,-.04,.05);
+mesh(mount,new TH.SphereGeometry(1,12,8),c,0,-.69,.26,.3,.2,.48);
+box(mount,trim,0,-.39,.27,.29,.09,.09)}}
 if(blade){const c=enchantedMaterial(blade.rarity),trim=blade.rarity>=3?M.gold:M.iron,staff=blade.name.includes('Runen');
-const sword=new TH.Group();weapon.add(sword);sword.position.set(-1.22,1.8,.24);sword.rotation.z=.18;
+const sword=new TH.Group();arms[0].userData.forearm.add(sword);sword.position.set(-.05,-.87,.13);sword.rotation.z=Math.PI;g.userData.heldSword=sword;
 cyl(sword,M.wood,0,-.25,0,.12,1.15);cyl(sword,trim,0,-.78,0,.2,.22);const guard=box(sword,trim,0,.45,0,1.45,.18,.34);
 for(const side of [-1,1]){const tip=mesh(sword,new TH.ConeGeometry(.19,.58,5),trim,side*.72,.62,0);tip.rotation.z=side*-.35}
 const bladeShape=new TH.Shape();bladeShape.moveTo(-.28,.52);bladeShape.lineTo(-.46,1.05);bladeShape.lineTo(-.3,2.8);bladeShape.lineTo(0,3.65);bladeShape.lineTo(.3,2.8);bladeShape.lineTo(.46,1.05);bladeShape.lineTo(.28,.52);bladeShape.closePath();
@@ -218,7 +228,7 @@ if(companion){const c=mat(colors[companion.rarity]);sphere(pet,c,2,.7,1.3,.68);s
 const originalMakeCharacter=makeCharacter;
 makeCharacter=function(kind='hero'){const g=originalMakeCharacter(kind),b=g.userData.body;
 box(b,M.wood,0,1.48,.02,1.23,.22,.83);box(b,M.gold,0,1.48,.48,.31,.3,.15);
-if(kind==='hero'){const cloak=mesh(b,new TH.PlaneGeometry(1.5,2.2,6,9),new TH.MeshStandardMaterial({color:'#354f68',side:TH.DoubleSide,roughness:.9}),0,2.12,-.64);cloak.rotation.x=-.13;g.userData.cloak=cloak}
+if(kind==='hero'){g.userData.cloak=g.userData.capeMesh}
 return g};
 // Drei kostenlos prozedural erzeugte Rüstungsstile – visuell nach Klasse und Seltenheit.
 const classPalette={Wächter:'#c8a56c',Waldläufer:'#76a887',Arkanist:'#8f86d2'};
