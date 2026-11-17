@@ -9,3 +9,6 @@ test('Core game content is preserved',()=>{for(const feature of ['function makeC
 test('No leftover V20 diagnostic graphics',()=>{assert.ok(!js.includes('GRAFIKTEST V20'));assert.ok(!js.includes('heroAura.rotation'))});
 test('No undefined velocity used in cape animation',()=>{assert.ok(!js.includes('velocity.x'))});
 test('Save compatibility key is preserved',()=>assert.match(js,/drachenfels-3d-save/));
+
+test('Equipment is attached to articulated limbs',()=>{for(const part of ['g.userData.gauntlets=gauntlets','g.userData.greaves=greaves','arms[0].userData.forearm.add(sword)','g.userData.gauntlets||arms.map','g.userData.greaves||legs.map'])assert.ok(js.includes(part),part)});
+test('Only one cape mesh per hero',()=>{assert.ok(js.includes('g.userData.cloak=g.userData.capeMesh'));assert.ok(!js.includes('new TH.PlaneGeometry(1.5,2.2,6,9)'))});
