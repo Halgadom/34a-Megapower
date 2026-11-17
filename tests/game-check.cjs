@@ -32,3 +32,5 @@ test('Forest terrain roads light and castle approach are implemented',()=>{for(c
 test('Castle towers have architectural layers and trees have buttress roots',()=>{for(const token of ['const castleWindowMat=','for(const y of [h*.35,h*.7,h-.8])','const crenel=box(g','for(let root=0;root<3;root++)','const buttress=mesh(g'])assert.ok(js.includes(token),token)});
 
 test('Castle gate has an open passage and furnished courtyard',()=>{for(const token of ['if(i!==3&&i!==4)','const castleGate=new TH.Group()','const castleCourtyard=new TH.Group()','cyl(castleCourtyard,M.water','box(castleGate,M.stone2,0,10.8'])assert.ok(js.includes(token),token)});
+
+test('Five castle courtyard upgrades are present',()=>{for(const token of ['const smithy=new TH.Group()','const market=new TH.Group()','const tavern=new TH.Group()','const signWood=mat','const courtyardLanterns=new TH.Group()'])assert.ok(js.includes(token),token)});
