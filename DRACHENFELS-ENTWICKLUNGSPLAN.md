@@ -34,3 +34,10 @@ Ein vollständig kostenloses, deutschsprachiges, WoW-inspiriertes Browser-3D-Fan
 - `new Function(s)` ist nur Syntaxprüfung, **kein Browser-Test**.
 - Bei `rebuildGear(g)` vorher alte `userData.rune/wingHalo/swordAura` löschen, um verwaiste Animationsreferenzen zu vermeiden.
 - Drei Charakterklassen: Wächter, Waldläufer, Arkanist.
+
+## Großes Update Version 13 (17.11.2026)
+- Neu gestaltete MMORPG-HUD mit Goldrahmen, Questtracker, 6-Felder-Aktionsleiste und kreisförmiger Live-Minimap.
+- Minimap zeigt Spielerrotation, NPCs, Gegner, Straßen und Bach in Echtzeit; Aktionsleiste ist mit bestehenden Kampf-/Menüfunktionen verbunden.
+- Beide HTML-Einstiegsseiten synchronisiert; JavaScript auf Syntax geprüft.
+- Ein generiertes Fantasy-MMO-Konzeptbild wurde als **Zielbild**, nicht als Screenshot des Spiels, im Chat erstellt.
+- **Wichtig:** Trotz großem UI-Update fehlen noch professionell animierte GLB-Charaktere und visuelle Endkontrolle. Nicht als AAA-fertig bezeichnen.
