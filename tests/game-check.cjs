@@ -14,3 +14,5 @@ test('Equipment is attached to articulated limbs',()=>{for(const part of ['g.use
 test('Only one cape mesh per hero',()=>{assert.ok(js.includes('g.userData.cloak=g.userData.capeMesh'));assert.ok(!js.includes('new TH.PlaneGeometry(1.5,2.2,6,9)'))});
 
 test('Armor mounts are reused and sword does not accumulate after re-equipping',()=>{for(const token of ['g.userData.shoulderMounts||arms.map','g.userData.heldSwordMount||new TH.Group()','heldSwordMount.add(sword)','shoulderMounts[x===-1?0:1]','shoulderMounts[side===-1?0:1]'])assert.ok(js.includes(token),token);assert.ok(!js.includes('arms[0].userData.forearm.add(sword)'))});
+
+test('Locomotion uses delta-time blending and smooth articulated joints',()=>{for(const token of ['const locomotion={speed:0,phase:0,heading:0}','function smoothJoint(','locomotion.phase+=dt*','hero.rotation.y+=turn*','leg.userData.shin.rotation.x=smoothJoint'])assert.ok(js.includes(token),token)});
