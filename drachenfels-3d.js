@@ -210,7 +210,37 @@ for(const [x,z,size] of [[-45,35,1],[44,72,1.4],[89,37,1.6],[-67,-25,.8],[-33,88
 function bridge(x,z){const g=new TH.Group();g.position.set(x,0,z);world.add(g);for(let i=-5;i<=5;i++){const p=box(g,M.wood,0,.5+Math.cos(i/6*Math.PI)*.35,i*.9,9,.26,.85);p.rotation.x=-i*.012}for(const side of [-1,1]){for(let i=-5;i<=5;i+=2)cyl(g,M.wood,side*4.4,1.45,i*.9,.16,2.2);box(g,M.wood,side*4.4,2.4,0,.22,.22,10.2)}}bridge(-74,35);bridge(-76,-37);
 
 house(-21,-39,1,0);house(21,-39,1,1);house(-22,-66,1.1,1);house(22,-66,1.1,0);house(-32,-102,1.3,0);house(32,-102,1.3,1);
-for(let i=0;i<8;i++){box(world,M.stone2,-39+i*11,2,-133,10,4,3);box(world,M.stone2,-39+i*11,2,-75,10,4,3)}for(let i=0;i<6;i++){box(world,M.stone2,-44,2,-125+i*9,3,4,9);box(world,M.stone2,44,2,-125+i*9,3,4,9)}tower(-43,-133);tower(43,-133);tower(-43,-75);tower(43,-75);const castle=house(0,-115,2.3,0);
+// Die Südmauer besitzt einen begehbaren Torbogen statt einer geschlossenen Barriere.
+for(let i=0;i<8;i++){
+const x=-39+i*11;
+if(i!==3&&i!==4)box(world,M.stone2,x,2,-133,10,4,3);
+box(world,M.stone2,x,2,-75,10,4,3);
+}
+const castleGate=new TH.Group();castleGate.position.set(0,0,-133);world.add(castleGate);
+for(const side of [-1,1]){
+box(castleGate,M.stone2,side*11,5,0,3.2,10,4);
+box(castleGate,castleTrimMat,side*9.2,5,2.1,.45,9.6,.4);
+}
+box(castleGate,M.stone2,0,10.8,0,24,3.6,4.4);
+for(let i=0;i<8;i++)box(castleGate,M.stone,i*3-10.5,13.2,0,2.2,1.8,4.1);
+const gateTimber=mat('#463629',.05,.9),gateIron=mat('#8c9292',.62,.38);
+for(let i=0;i<9;i++){const bar=box(castleGate,gateIron,-7.2+i*1.8,8.6,1.7,.2,2.1,.22);bar.castShadow=false}
+box(castleGate,gateTimber,0,9.5,1.6,16,.55,.7);
+// Freier Burghof mit Randsteinen, Brunnen und ruhigen Sitzbereichen.
+const castleCourtyard=new TH.Group();world.add(castleCourtyard);
+box(castleCourtyard,castleApproachMat,0,.035,-94,45,.06,30);
+for(const side of [-1,1]){
+for(let j=0;j<7;j++){
+const paving=box(castleCourtyard,j%2?M.stone:M.stone2,side*(9+j*2.2),.075,-94+(j%3-1)*6,1.9,.08,3.3);
+paving.rotation.y=(j%3-1)*.06;
+}
+box(castleCourtyard,M.wood,side*21,1,-92,3,.25,1.1);
+box(castleCourtyard,M.wood,side*21,.55,-92,3,.8,.25);
+}
+cyl(castleCourtyard,M.stone2,0,.7,-90,2.2,1.4);
+cyl(castleCourtyard,M.water,0,1.43,-90,1.85,.08);
+cyl(castleCourtyard,M.stone,0,2.1,-90,.22,1.6);
+for(let i=0;i<6;i++){box(world,M.stone2,-44,2,-125+i*9,3,4,9);box(world,M.stone2,44,2,-125+i*9,3,4,9)}tower(-43,-133);tower(43,-133);tower(-43,-75);tower(43,-75);const castle=house(0,-115,2.3,0);
 for(let i=0;i<20;i++){const a=i*Math.PI/10;const x=70+Math.cos(a)*17,z=45+Math.sin(a)*17;rock(x,z,1.4)}const portal=new TH.Group();portal.position.set(70,0,45);world.add(portal);for(const x of [-4,4])cyl(portal,M.stone2,x,4,0,1.2,8);box(portal,M.stone2,0,8,0,10,2,2);const portalGlow=mesh(portal,new TH.PlaneGeometry(7,7),new TH.MeshBasicMaterial({color:'#79b8ff',transparent:true,opacity:.55,side:TH.DoubleSide}),0,4,0);const portalLight=new TH.PointLight('#80aaff',25,18);portalLight.position.set(0,4,0);portal.add(portalLight);
 for(let i=0;i<12;i++){const x=(i%2?7:-7),z=10-i*13;const post=cyl(world,M.wood,x,2,z,.25,4);sphere(world,M.gold,x,4.3,z,.48);const l=new TH.PointLight('#ffbb72',3,11);l.position.set(x,4.3,z);world.add(l)}
 const colors=['#c1c7c7','#61c990','#68aaf0','#bc82e9','#f7c566','#ff7b96'];
