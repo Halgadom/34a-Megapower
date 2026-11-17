@@ -376,7 +376,20 @@ const armor=new TH.Group(),weapon=new TH.Group(),wings=new TH.Group(),pet=new TH
 g.userData={body,armor,weapon,wings,pet,cape,capeMesh,legs,arms,head,hairRoot,torso,headBase:3.66};
 if(kind==='hero')rebuildGear(g);else{box(armor,mat(kind==='boss'?'#784568':'#6b735d'),0,2.2,.1,1.65,1.85,1);box(weapon,M.wood,-1.5,1.8,.5,.2,3,.2)}
 return g}
-function rebuildGear(g){for(const key of ['rune','wingHalo','swordAura','heldSword'])delete g.userData[key];const {armor,weapon,wings,pet,arms,legs}=g.userData;for(const group of [armor,weapon,wings,pet,...(g.userData.gauntlets||[]),...(g.userData.greaves||[]),...(g.userData.shoulderMounts||[]),...(g.userData.heldSwordMount?[g.userData.heldSwordMount]:[])]){while(group.children.length)group.remove(group.children[0])}
+function rebuildGear(g){for(const key of ['rune','wingHalo','swordAura','heldSword'])delete g.userData[key];const {armor,weapon,wings,pet,arms,legs}=g.userData;// Ausrüstungswechsel: temporäre GPU-Ressourcen entsorgen, globale Materialien erhalten.
+const protectedGearMaterials=new Set([...Object.values(M),...Object.values(materials)]);
+const obsoleteGeometries=new Set(),obsoleteMaterials=new Set();
+for(const group of [armor,weapon,wings,pet,...(g.userData.gauntlets||[]),...(g.userData.greaves||[]),...(g.userData.shoulderMounts||[]),...(g.userData.heldSwordMount?[g.userData.heldSwordMount]:[])]){
+group.traverse(object=>{
+if(!object.isMesh)return;
+if(object.geometry)obsoleteGeometries.add(object.geometry);
+for(const material of Array.isArray(object.material)?object.material:[object.material])
+if(material&&!protectedGearMaterials.has(material))obsoleteMaterials.add(material);
+});
+group.clear();
+}
+for(const geometry of obsoleteGeometries)geometry.dispose();
+for(const material of obsoleteMaterials)material.dispose();
 const gauntlets=g.userData.gauntlets||arms.map(a=>{const mount=new TH.Group();a.userData.forearm.add(mount);return mount}),greaves=g.userData.greaves||legs.map(l=>{const mount=new TH.Group();l.userData.shin.add(mount);return mount});g.userData.gauntlets=gauntlets;g.userData.greaves=greaves;
 const shoulderMounts=g.userData.shoulderMounts||arms.map(a=>{const mount=new TH.Group();a.add(mount);return mount});g.userData.shoulderMounts=shoulderMounts;
 const heldSwordMount=g.userData.heldSwordMount||new TH.Group();if(!g.userData.heldSwordMount)arms[0].userData.forearm.add(heldSwordMount);g.userData.heldSwordMount=heldSwordMount;
