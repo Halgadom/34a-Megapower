@@ -26,3 +26,5 @@ test('Four distinct armor themes have geometry and use saved class',()=>{for(con
 test('Forest undergrowth uses instancing and preserves road clearings',()=>{for(const token of ['const forestFloor=new TH.Group()','const foliageShape=new TH.Shape()','function forestClearing(x,z)','new TH.InstancedMesh(foliageGeo,leafMat,650)','new TH.InstancedMesh(shrubGeo','forestFloor.add(shrubs)'])assert.ok(js.includes(token),token)});
 
 test('Forest trees have distinct oak birch and pine silhouettes',()=>{for(const token of ["species=seed%9<5?'oak'","species==='birch'","species==='pine'","const pineGeo=new TH.ConeGeometry","const birchBark=mat","const pineLeaves="])assert.ok(js.includes(token),token)});
+
+test('Forest terrain roads light and castle approach are implemented',()=>{for(const token of ['const groundPatches=new TH.Group()','new TH.InstancedMesh(patchGeo,patchMat,460)','const pathEdgeMat=','function path(x,z,w,d)','sun.color.copy(new TH.Color','renderer.toneMappingExposure=1.02+day*.2','function castleApproach()','castleApproach();'])assert.ok(js.includes(token),token)});
