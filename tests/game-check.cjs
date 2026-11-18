@@ -52,3 +52,6 @@ test('Dungeon retry removes stale enemies and saves respawn position',()=>{for(c
 
 test('Mobile camera pointer is isolated and released safely',()=>{for(const token of ["let cameraPointer=null","game.style.touchAction='none'","e.pointerId!==cameraPointer","lostpointercapture',releaseCamera","dragCamera=false;cameraPointer=null"])assert.ok(js.includes(token),token)});
 test('Combat filters dungeon enemies and only spends cooldown on valid hits',()=>{assert.ok(js.includes("!!m.dungeon!==run.active"));assert.ok(js.includes("if(opened||now<(skill?skillAt:attackAt))return"));assert.ok(js.indexOf("if(!target){toast('Kein Gegner in Reichweite');return}if(skill)skillAt=")>0)});
+
+test('Enemies pursue, return home, animate and use independent attack cooldowns',()=>{for(const token of ["function updateEnemyAI(t,dt)","if(!m.alive||!!m.dungeon!==run.active)continue","home<28","m.nextAttack=t+","motion.legs[j].rotation.x","updateEnemyAI(t,dt);dungeonBossMechanics(t)"])assert.ok(js.includes(token),token)});
+test('Defeat and respawn are handled once after enemy AI updates',()=>{assert.ok(js.includes("if(state.hp<=1){state.hp=stats().maxhp;if(run.active)resetDungeon("));assert.ok(!js.includes("Math.floor(t/1700)"))});
