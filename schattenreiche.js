@@ -1,24 +1,30 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
-const $=id=>document.getElementById(id),scene=new THREE.Scene();scene.background=new THREE.Color(0x24334c);scene.fog=new THREE.FogExp2(0x101b32,.006);
-const camera=new THREE.PerspectiveCamera(66,innerWidth/innerHeight,.1,350),renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.25;renderer.outputColorSpace=THREE.SRGBColorSpace;document.body.prepend(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0xa6c9ff,0x354c39,2.4));const sun=new THREE.DirectionalLight(0xffc58d,2.2);sun.position.set(-25,35,20);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-65;sun.shadow.camera.right=65;sun.shadow.camera.top=65;sun.shadow.camera.bottom=-65;scene.add(sun);
+const $=id=>document.getElementById(id),scene=new THREE.Scene();scene.background=new THREE.Color(0x667f91);scene.fog=new THREE.FogExp2(0x6b8490,.0045);
+const camera=new THREE.PerspectiveCamera(66,innerWidth/innerHeight,.1,350),renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.42;renderer.outputColorSpace=THREE.SRGBColorSpace;document.body.prepend(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xc8e3ff,0x40552e,2.2));const sun=new THREE.DirectionalLight(0xffc58d,2.2);sun.position.set(-35,55,-35);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-65;sun.shadow.camera.right=65;sun.shadow.camera.top=65;sun.shadow.camera.bottom=-65;scene.add(sun);
 let profile={};try{profile=JSON.parse(sessionStorage.getItem('megapower_schattenreiche_hero')||'{}')}catch{}$('hero').textContent=profile.name||'Abenteurer';$('lvl').textContent=profile.level||1;
 const mat=(c,em=0)=>new THREE.MeshStandardMaterial({color:c,roughness:.55,metalness:.22,emissive:c,emissiveIntensity:em}),geo=(r=1)=>new THREE.SphereGeometry(r,12,8);
 // Hand-painted procedural ground texture (no paid assets, no network requests).
 function terrainTexture(){const canvas=document.createElement('canvas');canvas.width=canvas.height=512;const ctx=canvas.getContext('2d');ctx.fillStyle='#385d42';ctx.fillRect(0,0,512,512);let seed=817;const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};for(let i=0;i<14000;i++){const x=random()*512,y=random()*512,r=1+random()*8;ctx.fillStyle=random()>.5?'rgba(17,36,24,.10)':'rgba(150,170,107,.09)';ctx.beginPath();ctx.ellipse(x,y,r,r*.4,random()*6.28,0,6.28);ctx.fill()}for(let i=0;i<700;i++){const x=random()*512,y=random()*512;ctx.strokeStyle='rgba(135,182,112,.20)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+random()*4-2,y-4-random()*5);ctx.stroke()}const tex=new THREE.CanvasTexture(canvas);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(26,26);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return tex}
-const groundMaterial=new THREE.MeshStandardMaterial({map:terrainTexture(),roughness:1,color:0x9db6a0});
+const groundMaterial=new THREE.MeshStandardMaterial({map:terrainTexture(),roughness:1,color:0xc3d3a2});
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(400,400),groundMaterial);ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
 const rng=(a,b)=>a+Math.random()*(b-a),props=new THREE.Group();scene.add(props);const bark=mat(0x493527),leafDark=mat(0x194d38),leafLight=mat(0x327957),stone=mat(0x596878);
 function box(w,h,d,c,x,y,z,parent=props){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c));m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m}
 // Layered stylized forest: branching trees, boulders, grass, glowing flora and a stone path.
 const forestColors=[mat(0x194f3c),mat(0x286b4a),mat(0x397d58),mat(0x244d45)];
-function addTree(x,z,scale){const group=new THREE.Group();group.position.set(x,0,z);group.scale.setScalar(scale);props.add(group);const h=rng(4.2,7.5),trunk=new THREE.Mesh(new THREE.CylinderGeometry(.24,.55,h,9),bark);trunk.position.y=h/2;trunk.castShadow=true;group.add(trunk);for(let j=0;j<7;j++){const angle=j*2.4,dist=j===0?0:1.2;const leaf=new THREE.Mesh(new THREE.IcosahedronGeometry(rng(1.25,1.9),1),forestColors[j%4]);leaf.position.set(Math.cos(angle)*dist,h+Math.sin(j*2)*.65,Math.sin(angle)*dist);leaf.scale.set(1.15,.9,1.1);leaf.castShadow=true;group.add(leaf)}}
-for(let i=0;i<110;i++){const x=rng(-120,120),z=rng(-120,120);if(Math.hypot(x,z)<14||Math.abs(x)<7&&z>-34&&z<10)continue;addTree(x,z,rng(.65,1.4))}
+function addTree(x,z,scale){const group=new THREE.Group();group.position.set(x,0,z);group.scale.setScalar(scale);props.add(group);const h=rng(6.2,10.5),trunk=new THREE.Mesh(new THREE.CylinderGeometry(.24,.55,h,9),bark);trunk.position.y=h/2;trunk.castShadow=true;group.add(trunk);for(let j=0;j<11;j++){const angle=j*2.4,dist=j===0?0:1.2;const leaf=new THREE.Mesh(new THREE.IcosahedronGeometry(rng(1.45,2.25),2),forestColors[j%4]);leaf.position.set(Math.cos(angle)*dist,h+Math.sin(j*2)*.65,Math.sin(angle)*dist);leaf.scale.set(1.15,.9,1.1);leaf.castShadow=true;group.add(leaf)}}
+for(let i=0;i<165;i++){const x=rng(-120,120),z=rng(-120,120);if(Math.hypot(x,z)<14||Math.abs(x)<7&&z>-34&&z<10)continue;addTree(x,z,rng(.65,1.4))}
 for(let i=0;i<100;i++){const x=rng(-100,100),z=rng(-100,100);if(Math.hypot(x,z)<10)continue;const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(rng(.4,1.65),1),stone);rock.position.set(x,.2,z);rock.scale.set(1,.5,rng(.7,1.5));rock.castShadow=true;props.add(rock)}
-const grassGeometry=new THREE.ConeGeometry(.12,.7,3),grassMaterials=[mat(0x397f4d),mat(0x52935a),mat(0x245c3d)];for(let c=0;c<3;c++){const inst=new THREE.InstancedMesh(grassGeometry,grassMaterials[c],650),dummy=new THREE.Object3D();for(let i=0;i<650;i++){dummy.position.set(rng(-100,100),.25,rng(-100,100));dummy.rotation.set(0,rng(0,6.28),rng(-.25,.25));dummy.scale.setScalar(rng(.5,1.3));dummy.updateMatrix();inst.setMatrixAt(i,dummy.matrix)}inst.instanceMatrix.needsUpdate=true;props.add(inst)}
+const grassGeometry=new THREE.ConeGeometry(.12,.7,3),grassMaterials=[mat(0x397f4d),mat(0x52935a),mat(0x245c3d)];for(let c=0;c<3;c++){const inst=new THREE.InstancedMesh(grassGeometry,grassMaterials[c],1800),dummy=new THREE.Object3D();for(let i=0;i<1800;i++){dummy.position.set(rng(-100,100),.25,rng(-100,100));dummy.rotation.set(0,rng(0,6.28),rng(-.25,.25));dummy.scale.setScalar(rng(.5,1.3));dummy.updateMatrix();inst.setMatrixAt(i,dummy.matrix)}inst.instanceMatrix.needsUpdate=true;props.add(inst)}
 const crystalMaterial=new THREE.MeshStandardMaterial({color:0x9d63ed,emissive:0x6424b5,emissiveIntensity:.9,metalness:.2,roughness:.17});for(let i=0;i<22;i++){const x=rng(-80,80),z=rng(-80,80);if(Math.hypot(x,z)<13)continue;for(let j=0;j<4;j++){const crystal=new THREE.Mesh(new THREE.OctahedronGeometry(rng(.35,.85)),crystalMaterial);crystal.scale.y=rng(1.3,2.6);crystal.position.set(x+rng(-.9,.9),.8,z+rng(-.9,.9));crystal.rotation.z=rng(-.4,.4);props.add(crystal)}}
 for(let i=0;i<12;i++){const x=(i%2?1:-1)*rng(12,38),z=-22-rng(0,35),h=rng(2,5);box(1.3,h,1.3,0x62667a,x,h/2,z);box(2.3,.45,2.3,0x85899b,x,h+.1,z)}
 for(let z=-19;z<12;z+=1.7){const slab=new THREE.Mesh(new THREE.BoxGeometry(rng(1.5,2.6),.12,rng(1.2,1.6)),stone);slab.position.set(rng(-.2,.2),.08,z);slab.rotation.y=rng(-.1,.1);props.add(slab)}
+// Ferns and meadow flowers break up the flat terrain without paid textures.
+const fernMat=new THREE.MeshStandardMaterial({color:0x2b6745,roughness:1,side:THREE.DoubleSide});
+const fernGeometry=new THREE.ConeGeometry(.27,.9,5);
+const fernInst=new THREE.InstancedMesh(fernGeometry,fernMat,850),fernDummy=new THREE.Object3D();
+for(let i=0;i<850;i++){const x=rng(-100,100),z=rng(-100,100);fernDummy.position.set(x,.4,z);fernDummy.rotation.set(rng(-.2,.2),rng(0,6.28),rng(-.3,.3));fernDummy.scale.set(rng(.7,1.6),rng(.6,1.5),rng(.7,1.4));fernDummy.updateMatrix();fernInst.setMatrixAt(i,fernDummy.matrix)}
+fernInst.instanceMatrix.needsUpdate=true;props.add(fernInst);
 const fireflies=[];for(let i=0;i<55;i++){const f=new THREE.Mesh(new THREE.SphereGeometry(.04,6,5),new THREE.MeshBasicMaterial({color:i%3?0x9deed0:0xffc873}));f.userData={x:rng(-50,50),y:rng(.5,3),z:rng(-50,50),phase:rng(0,6.28)};f.position.set(f.userData.x,f.userData.y,f.userData.z);scene.add(f);fireflies.push(f)}
 // Distant mountains, ruins and ambient world geometry.
 const mountainMat=new THREE.MeshStandardMaterial({color:0x34465c,roughness:1,flatShading:true}),mountainSnow=new THREE.MeshStandardMaterial({color:0x8293a3,roughness:.92});
@@ -68,8 +74,8 @@ armorPiece(new THREE.BoxGeometry(.9,.1,.1),royalGold,0,1.47,-.42);
 armorPiece(new THREE.OctahedronGeometry(.24),crystal,0,1.81,-.53);
 for(const sign of [-1,1]){
  const shoulder=armorPiece(new THREE.SphereGeometry(.41,12,10),obsidian,sign*.73,2.24,0);shoulder.scale.set(1.2,.55,1.15);
- const blade=armorPiece(new THREE.ConeGeometry(.35,1.85,5),obsidian,sign*.92,3.06,0,0,0,-sign*.3);
- armorPiece(new THREE.ConeGeometry(.19,1.55,5),royalGold,sign*.92,3.09,-.09,0,0,-sign*.3);
+ const blade=armorPiece(new THREE.ConeGeometry(.24,1.08,7),obsidian,sign*.79,2.71,0,0,0,-sign*.3);
+ armorPiece(new THREE.ConeGeometry(.09,.93,7),royalGold,sign*.79,2.74,-.09,0,0,-sign*.3);
  armorPiece(new THREE.ConeGeometry(.25,.85,5),magenta,sign*.57,2.8,.1,0,0,sign*.35);
  armorPiece(new THREE.BoxGeometry(.28,.5,.48),obsidian,sign*.77,1.8,-.02);
  armorPiece(new THREE.OctahedronGeometry(.16),crystal,sign*.7,1.92,-.3);
@@ -86,10 +92,22 @@ for(const sign of [-1,1]){armorPiece(new THREE.BoxGeometry(.32,.55,.1),obsidian,
 const auraGroup=new THREE.Group();hero.add(auraGroup);const auraLight=new THREE.PointLight(0xed36db,2.5,6);auraLight.position.y=1.6;hero.add(auraLight);
 const auraFlames=[];for(let i=0;i<18;i++){const a=i*Math.PI*2/18,flame=armorPiece(new THREE.ConeGeometry(.085,.45+Math.random()*.4,5),i%4===0?crystal:magenta,Math.cos(a)*1.05,.3+Math.random()*2.4,Math.sin(a)*.7,0,0,0,auraGroup);auraFlames.push({flame,a,phase:Math.random()*6.28})}
 // Additional rear silhouette: angular mantle, engraved pauldrons and flowing robe.
-for(const side of [-1,1]){const backWing=armorPiece(new THREE.ConeGeometry(.34,2.25,4),obsidian,side*.86,2.75,.34,0,0,-side*.38);backWing.scale.z=.7;const trim=armorPiece(new THREE.ConeGeometry(.095,1.65,4),royalGold,side*.9,2.85,.11,0,0,-side*.38);trim.scale.z=.65}
+for(const side of [-1,1]){const backWing=armorPiece(new THREE.ConeGeometry(.24,1.22,6),obsidian,side*.72,2.52,.34,0,0,-side*.38);backWing.scale.z=.7;const trim=armorPiece(new THREE.ConeGeometry(.07,1.05,6),royalGold,side*.73,2.57,.11,0,0,-side*.38);trim.scale.z=.65}
 const backCrest=armorPiece(new THREE.OctahedronGeometry(.29),crystal,0,1.91,.55);backCrest.scale.z=.55;
 const capeTail=armorPiece(new THREE.ConeGeometry(.7,1.7,5),blackFabric,0,.82,.42,Math.PI,0,0);capeTail.scale.z=.36;
 const sigil=armorPiece(new THREE.TorusGeometry(.48,.035,8,40),magenta,0,1.82,.62);sigil.rotation.x=.06;
+// Layered armor, detailed gauntlets and a more natural fantasy-warrior silhouette.
+const steel=new THREE.MeshStandardMaterial({color:0x344052,metalness:.84,roughness:.3});
+for(const side of [-1,1]){
+ armorPiece(new THREE.BoxGeometry(.33,.53,.4),steel,side*.72,1.7,0);
+ armorPiece(new THREE.BoxGeometry(.37,.12,.43),royalGold,side*.72,1.93,0);
+ armorPiece(new THREE.BoxGeometry(.3,.55,.42),steel,side*.24,.72,-.07);
+ armorPiece(new THREE.BoxGeometry(.32,.08,.45),royalGold,side*.24,.47,-.07);
+ for(let i=0;i<3;i++)armorPiece(new THREE.BoxGeometry(.13,.045,.06),royalGold,side*.25,.82+i*.16,-.31);
+}
+for(let i=0;i<5;i++)armorPiece(new THREE.BoxGeometry(.1,.09,.07),royalGold,(i-2)*.15,1.96,-.5);
+const blade=weapon.children.find(m=>m.geometry?.type==='ConeGeometry');
+if(blade){blade.geometry.dispose();blade.geometry=new THREE.BoxGeometry(.19,1.42,.075);blade.position.y=1.04;blade.material=new THREE.MeshStandardMaterial({color:0xb7d9ef,metalness:.93,roughness:.13});}
 const originalAvatar=null;
 const companion=new THREE.Group();scene.add(companion);const petHue=[0x5531a8,0x6131a8,0x442080,0x6631af,0x37145b,0x4e2093];const petColor=petHue[Math.abs(Number(profile.equippedPet)||0)%petHue.length],petMat=mat(petColor,.26);
 part(new THREE.SphereGeometry(.3,14,12),petMat,0,.49,0,companion);part(new THREE.SphereGeometry(.22,12,10),petMat,0,.85,-.08,companion);
