@@ -49,3 +49,6 @@ test('Humanoid hairstyle and articulated ankle meshes are present',()=>{for(cons
 test('Layered armor detail survives equipment rebuild',()=>{for(const token of ["Dreischichtiger Harnisch","const lamella=box(armor","const collar=mesh(armor","protectedGearMaterials.has(material)"])assert.ok(js.includes(token),token)});
 
 test('Dungeon retry removes stale enemies and saves respawn position',()=>{for(const token of ["for(let i=mobs.length-1;i>=0;i--)","mobs.splice(i,1)","if(run.active)resetDungeon(","state.pos=hero.position.toArray();save()"])assert.ok(js.includes(token),token)});
+
+test('Mobile camera pointer is isolated and released safely',()=>{for(const token of ["let cameraPointer=null","game.style.touchAction='none'","e.pointerId!==cameraPointer","lostpointercapture',releaseCamera","dragCamera=false;cameraPointer=null"])assert.ok(js.includes(token),token)});
+test('Combat filters dungeon enemies and only spends cooldown on valid hits',()=>{assert.ok(js.includes("!!m.dungeon!==run.active"));assert.ok(js.includes("if(opened||now<(skill?skillAt:attackAt))return"));assert.ok(js.indexOf("if(!target){toast('Kein Gegner in Reichweite');return}if(skill)skillAt=")>0)});
