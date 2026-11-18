@@ -42,3 +42,5 @@ test('Cape animation is damped and sky colors are reused',()=>{for(const token o
 test('Equipment rebuild disposes temporary GPU resources',()=>{for(const token of ['const obsoleteGeometries=new Set()','const obsoleteMaterials=new Set()','group.traverse(object=>','geometry.dispose()','material.dispose()','protectedGearMaterials.has(material)'])assert.ok(js.includes(token),token)});
 
 test('Academy lessons, progress and graduation are present',()=>{for(const token of ["const academyLessons=","function academyLesson(index)","function academyCase(i)","function academyProgress()","state.quests.academyComplete=true","academyProgress()===academyLessons.length"])assert.ok(js.includes(token),token)});
+
+test('Dungeon has three boss phases, warning circles, reset and persistent clears',()=>{for(const token of ["function clearDungeonTelegraph()","function resetDungeon(message)","function dungeonBossMechanics(t)","boss.bossPhase!==phase","phase===3?5.8","state.quests.dungeonClears=","dungeonBossMechanics(t)"])assert.ok(js.includes(token),token)});
