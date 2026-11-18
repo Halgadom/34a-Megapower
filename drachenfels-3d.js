@@ -404,6 +404,7 @@ const chest=equipped('chest'),helm=equipped('helm'),gloves=equipped('gloves'),bo
 const armorTheme=chest?(chest.name.includes('Drachen')?'dragon':state.class==='Waldläufer'?'ranger':state.class==='Arkanist'?'arcane':'guardian'):'guardian';
 const themeColors={dragon:['#752d30','#e7a94c'],ranger:['#365747','#a7bd86'],arcane:['#39446d','#8cccf2'],guardian:['#344b65','#e4bd79']};
 const theme=themeColors[armorTheme],themeMetal=mat(theme[0],.72,.28),themeAccent=mat(theme[1],.75,.25);
+if(g.userData.armorTheme!==armorTheme)g.userData.armorTheme=armorTheme;
 
 if(g.userData.hairRoot)g.userData.hairRoot.visible=!helm;
 const gem=(p,x,y,z,c,r=.18)=>{const a=mesh(p,new TH.OctahedronGeometry(1),c,x,y,z,r,r*1.5,r);a.rotation.y=.4;return a};
@@ -429,6 +430,13 @@ const crest=mesh(mount,new TH.BoxGeometry(.12,.52,.12),themeAccent,side*.42,.12,
 const skirt=box(armor,themeMetal,side*.39,1.25,.38,.44,.62,.43);skirt.rotation.z=side*.12}
 const insignia=mesh(armor,new TH.OctahedronGeometry(.19),themeAccent,0,2.53,1.05);
 }}
+// Dreischichtiger Harnisch: segmentierter Hüftschutz, Brustspange und seitliche Nieten.
+if(chest){for(const side of [-1,1]){
+for(let j=0;j<3;j++){const lamella=box(armor,themeMetal,side*(.2+j*.24),1.54-j*.065,.47,.29,.48,.18);lamella.rotation.z=side*(.08+j*.12);box(armor,themeAccent,side*(.2+j*.24),1.74-j*.065,.59,.27,.055,.045)}
+for(let j=0;j<4;j++){const stud=sphere(armor,themeAccent,side*.58,2.67-j*.25,.99,.055);stud.scale.z=.45}
+}
+const collar=mesh(armor,new TH.TorusGeometry(.55,.095,8,24,Math.PI),themeAccent,0,2.93,.6);collar.rotation.z=Math.PI;
+}
 if(chest&&chest.rarity>=2){const inlay=mat(chest.rarity>=4?'#e6b957':'#83b8d9',.7,.24);for(const side of [-1,1]){const edge=box(armor,inlay,side*.73,2.25,.77,.1,1.2,.12);edge.rotation.z=side*.17;for(let j=0;j<3;j++){const stud=sphere(armor,inlay,side*.76,2.68-j*.38,.85,.09);stud.scale.z=.55}}}
 if(chest&&chest.rarity>=4){const rune=new TH.Group();rune.position.set(0,2.48,.91);armor.add(rune);const ink=new TH.MeshBasicMaterial({color:colors[chest.rarity]});for(let j=0;j<4;j++){const a=j*Math.PI/2;const bar=box(rune,ink,Math.cos(a)*.24,Math.sin(a)*.24,0,.08,.38,.055);bar.rotation.z=-a}const center=mesh(rune,new TH.OctahedronGeometry(.17),ink,0,0,.08);g.userData.rune=rune}
 if(chest){const metal=enchantedMaterial(chest.rarity),trim=chest.rarity>=3?M.gold:M.iron;
