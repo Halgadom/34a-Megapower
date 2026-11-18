@@ -60,3 +60,5 @@ test('Combat damage is applied by enemy AI, not again on a successful player hit
 test('Dungeon kill and boss phase are guarded',()=>{assert.ok(js.includes("if(!m.dungeon||!run.active)return"));assert.ok(js.includes("if(boss.aura&&phase>1)boss.aura.material=M.red"))});
 
 test('Dungeon victory and defeat share cleanup, boss pauses in menus',()=>{for(const token of ["function returnFromDungeon()","function clearDungeonEnemies()","returnFromDungeon()}}","if(opened||!run.active||run.wave!==3)return"])assert.ok(js.includes(token),token)});
+
+test('Dungeon waves spawn inside the arena with reachable aggro and attack grace',()=>{for(const token of ["const radius=run.wave===3?13:12","const pursuit=m.dungeon?40:","m.nextAttack=performance.now()+1200"])assert.ok(js.includes(token),token);assert.ok(!js.includes("Math.cos(a)*22,130+Math.sin(a)*22"))});
