@@ -48,7 +48,7 @@ test('Dungeon has three boss phases, warning circles, reset and persistent clear
 test('Humanoid hairstyle and articulated ankle meshes are present',()=>{for(const token of ["const temple=mesh(hairRoot","const back=mesh(hairRoot","leg.userData.foot=foot","leg.userData.foot.rotation.x=smoothJoint"])assert.ok(js.includes(token),token)});
 test('Layered armor detail survives equipment rebuild',()=>{for(const token of ["Dreischichtiger Harnisch","const lamella=box(armor","const collar=mesh(armor","protectedGearMaterials.has(material)"])assert.ok(js.includes(token),token)});
 
-test('Dungeon retry removes stale enemies and saves respawn position',()=>{for(const token of ["for(let i=mobs.length-1;i>=0;i--)","mobs.splice(i,1)","if(run.active)resetDungeon(","state.pos=hero.position.toArray();save()"])assert.ok(js.includes(token),token)});
+test('Dungeon retry removes stale enemies and saves respawn position',()=>{for(const token of ["function clearDungeonEnemies()","mobs.splice(i,1)","if(run.active)resetDungeon(","state.pos=hero.position.toArray();save()"])assert.ok(js.includes(token),token)});
 
 test('Mobile camera pointer is isolated and released safely',()=>{for(const token of ["let cameraPointer=null","game.style.touchAction='none'","e.pointerId!==cameraPointer","lostpointercapture',releaseCamera","dragCamera=false;cameraPointer=null"])assert.ok(js.includes(token),token)});
 test('Combat filters dungeon enemies and only spends cooldown on valid hits',()=>{assert.ok(js.includes("!!m.dungeon!==run.active"));assert.ok(js.includes("if(opened||now<(skill?skillAt:attackAt))return"));assert.ok(js.indexOf("if(!target){toast('Kein Gegner in Reichweite');return}if(skill)skillAt=")>0)});
@@ -58,3 +58,5 @@ test('Defeat and respawn are handled once after enemy AI updates',()=>{assert.ok
 
 test('Combat damage is applied by enemy AI, not again on a successful player hit',()=>{assert.ok(js.includes("if(m.alert&&dist<=reach&&t>=m.nextAttack)"));assert.ok(!js.includes("if(d<6){state.hp="));assert.ok(js.includes("flash.geometry.dispose()"))});
 test('Dungeon kill and boss phase are guarded',()=>{assert.ok(js.includes("if(!m.dungeon||!run.active)return"));assert.ok(js.includes("if(boss.aura&&phase>1)boss.aura.material=M.red"))});
+
+test('Dungeon victory and defeat share cleanup, boss pauses in menus',()=>{for(const token of ["function returnFromDungeon()","function clearDungeonEnemies()","returnFromDungeon()}}","if(opened||!run.active||run.wave!==3)return"])assert.ok(js.includes(token),token)});
