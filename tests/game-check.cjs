@@ -55,3 +55,6 @@ test('Combat filters dungeon enemies and only spends cooldown on valid hits',()=
 
 test('Enemies pursue, return home, animate and use independent attack cooldowns',()=>{for(const token of ["function updateEnemyAI(t,dt)","if(!m.alive||!!m.dungeon!==run.active)continue","home<28","m.nextAttack=t+","motion.legs[j].rotation.x","updateEnemyAI(t,dt);dungeonBossMechanics(t)"])assert.ok(js.includes(token),token)});
 test('Defeat and respawn are handled once after enemy AI updates',()=>{assert.ok(js.includes("if(state.hp<=1){state.hp=stats().maxhp;if(run.active)resetDungeon("));assert.ok(!js.includes("Math.floor(t/1700)"))});
+
+test('Combat damage is applied by enemy AI, not again on a successful player hit',()=>{assert.ok(js.includes("if(m.alert&&dist<=reach&&t>=m.nextAttack)"));assert.ok(!js.includes("if(d<6){state.hp="));assert.ok(js.includes("flash.geometry.dispose()"))});
+test('Dungeon kill and boss phase are guarded',()=>{assert.ok(js.includes("if(!m.dungeon||!run.active)return"));assert.ok(js.includes("if(boss.aura&&phase>1)boss.aura.material=M.red"))});
