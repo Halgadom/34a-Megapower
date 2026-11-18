@@ -40,3 +40,5 @@ test('Castle NPC services and persistent guard quest are wired',()=>{for(const t
 test('Cape animation is damped and sky colors are reused',()=>{for(const token of ["TH.MathUtils.damp(hero.userData.capeMesh.rotation.x","const moonlightColor=new TH.Color","sun.color.copy(moonlightColor)"])assert.ok(js.includes(token),token);assert.ok(!js.includes("hero.userData.capeMesh.rotation.x=-.14-(walking?.18:0)"))});
 
 test('Equipment rebuild disposes temporary GPU resources',()=>{for(const token of ['const obsoleteGeometries=new Set()','const obsoleteMaterials=new Set()','group.traverse(object=>','geometry.dispose()','material.dispose()','protectedGearMaterials.has(material)'])assert.ok(js.includes(token),token)});
+
+test('Academy lessons, progress and graduation are present',()=>{for(const token of ["const academyLessons=","function academyLesson(index)","function academyCase(i)","function academyProgress()","state.quests.academyComplete=true","academyProgress()===academyLessons.length"])assert.ok(js.includes(token),token)});
