@@ -323,8 +323,8 @@ sphere(leg,materials.pants,0,-.84,0,.23);
 const shin=new TH.Group();shin.position.set(0,-.84,0);leg.add(shin);
 mesh(shin,new TH.CylinderGeometry(.215,.16,.7,12),materials.pants,0,-.33,.04);
 mesh(shin,new TH.SphereGeometry(1,12,8),materials.pants,0,-.12,.12,.215,.23,.23);
-const foot=mesh(shin,new TH.SphereGeometry(1,10,8),materials.pants,0,-.64,.18,.25,.19,.44);
-leg.userData.shin=shin;legs.push(leg);
+const foot=new TH.Group();foot.position.set(0,-.64,.18);shin.add(foot);mesh(foot,new TH.SphereGeometry(1,12,10),materials.pants,0,0,0,.25,.19,.44);
+leg.userData.shin=shin;leg.userData.foot=foot;legs.push(leg);
 const arm=new TH.Group();arm.position.set(side*.83,2.9,0);body.add(arm);
 mesh(arm,new TH.SphereGeometry(1,14,10),cloth,0,-.12,0,.31,.35,.3);
 mesh(arm,new TH.CylinderGeometry(.255,.19,.68,12),cloth,side*.08,-.44,0);
@@ -351,6 +351,13 @@ const nostril=sphere(body,faceShade,side*.075,3.48,.68,.025);nostril.scale.y=.5;
 }
 const mouth=mesh(body,new TH.TorusGeometry(.14,.018,5,16,Math.PI),lip,0,3.34,.5);mouth.rotation.z=Math.PI;
 for(let j=0;j<5;j++){const strand=mesh(hairRoot,new TH.ConeGeometry(.065,.3,5),materials.hair,-.42+j*.21,4.01,.43);strand.rotation.z=(j-2)*.18}
+// Dreidimensionale Frisur: Schläfensträhnen, Hinterkopf und unterschiedlich lange Haarspitzen.
+for(const side of [-1,1]){
+const temple=mesh(hairRoot,new TH.SphereGeometry(1,12,9),materials.hair,side*.51,3.87,-.025,.17,.37,.29);
+temple.rotation.z=side*-.17;
+for(let j=0;j<3;j++){const strand=mesh(hairRoot,new TH.ConeGeometry(.105-j*.014,.49+j*.13,6),materials.hair,side*(.34+j*.1),3.83-j*.09,-.38-j*.05);strand.rotation.z=side*(.12+j*.12)}
+}
+for(let j=0;j<6;j++){const angle=(j/5-.5)*2.3;const back=mesh(hairRoot,new TH.ConeGeometry(.13,.48+(j%2)*.16,6),materials.hair,Math.sin(angle)*.44,3.83,-.47-Math.cos(angle)*.08);back.rotation.z=Math.sin(angle)*-.24}
 // Hochwertigere Grundausstattung bleibt auch ohne Loot sichtbar.
 const underArmor=new TH.Group();body.add(underArmor);
 const leather=mat(kind==='boss'?'#4e394d':'#504b4a',.18,.8),seam=mat('#c9a56b',.55,.42);
@@ -657,6 +664,7 @@ const offset=j*Math.PI,cycle=Math.sin(locomotion.phase+offset);
 const leg=hero.userData.legs[j],arm=hero.userData.arms[j];
 leg.rotation.x=smoothJoint(leg.rotation.x,cycle*.61*strength,dt,13);
 leg.userData.shin.rotation.x=smoothJoint(leg.userData.shin.rotation.x,Math.max(0,-cycle)*.7*strength,dt,12);
+leg.userData.foot.rotation.x=smoothJoint(leg.userData.foot.rotation.x,(-Math.max(0,cycle)*.35+Math.max(0,-cycle)*.18)*strength,dt,12);
 arm.rotation.x=smoothJoint(arm.rotation.x,-cycle*.42*strength+(1-strength)*Math.sin(t*.0018+j)*.025,dt,12);
 arm.rotation.z=smoothJoint(arm.rotation.z,(j?-.09:.09)*strength,dt,9);
 arm.userData.forearm.rotation.x=smoothJoint(arm.userData.forearm.rotation.x,-.14-Math.max(0,cycle)*.24*strength,dt,11);
