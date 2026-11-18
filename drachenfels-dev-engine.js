@@ -4,11 +4,11 @@ if(!TH){$('loadstatus').textContent='Die 3D-Engine konnte nicht geladen werden. 
 const scene=new TH.Scene();scene.background=new TH.Color('#8db6c7');scene.fog=new TH.FogExp2('#9cb7b5',.012);
 const camera=new TH.PerspectiveCamera(65,innerWidth/innerHeight,.1,650);
 const renderer=new TH.WebGLRenderer({canvas:$('game'),antialias:true,powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(devicePixelRatio,innerWidth<700?1.15:1.6));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=innerWidth>700;renderer.shadowMap.type=TH.PCFSoftShadowMap;renderer.outputColorSpace=TH.SRGBColorSpace;renderer.toneMapping=TH.ACESFilmicToneMapping;renderer.toneMappingExposure=1.3;
-scene.add(new TH.HemisphereLight(0xe5f3ff,0x536d54,2.1));
-const sun=new TH.DirectionalLight(0xffdfab,2.8);sun.position.set(45,85,25);sun.castShadow=true;sun.shadow.mapSize.set(innerWidth<700?1024:2048,innerWidth<700?1024:2048);sun.shadow.camera.left=-95;sun.shadow.camera.right=95;sun.shadow.camera.top=95;sun.shadow.camera.bottom=-95;sun.shadow.bias=-.0005;scene.add(sun);
+renderer.setPixelRatio(Math.min(devicePixelRatio,innerWidth<700?1.15:1.6));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=innerWidth>700;renderer.shadowMap.type=TH.PCFSoftShadowMap;renderer.outputColorSpace=TH.SRGBColorSpace;renderer.toneMapping=TH.ACESFilmicToneMapping;renderer.toneMappingExposure=.86;
+scene.add(new TH.HemisphereLight(0xbad1e2,0x334638,.92));
+const sun=new TH.DirectionalLight(0xffd7a1,1.55);sun.position.set(45,85,25);sun.castShadow=true;sun.shadow.mapSize.set(innerWidth<700?1024:2048,innerWidth<700?1024:2048);sun.shadow.camera.left=-95;sun.shadow.camera.right=95;sun.shadow.camera.top=95;sun.shadow.camera.bottom=-95;sun.shadow.bias=-.0005;scene.add(sun);
 const mat=(c,metal=0,rough=1)=>new TH.MeshStandardMaterial({color:c,metalness:metal,roughness:rough});
-const M={grass:mat('#60845b'),grass2:mat('#76945c'),dirt:mat('#9b8363'),stone:mat('#7b8588'),stone2:mat('#b7b0a2'),wall:mat('#c7bda7'),roof:mat('#476077'),wood:mat('#72523e'),gold:mat('#e4c27e',.65,.3),iron:mat('#a8bbc0',.75,.3),water:mat('#4a9db0',.15,.17),tree:mat('#3f6f50'),tree2:mat('#5c8851'),dark:mat('#24364c'),skin:mat('#d9ad87'),black:mat('#2b3036'),white:mat('#f4e8ce'),red:mat('#8b4c53'),blue:mat('#527aa8'),glow:new TH.MeshStandardMaterial({color:'#80d7e9',emissive:'#287aab',emissiveIntensity:1.5})};
+const M={grass:mat('#60845b'),grass2:mat('#76945c'),dirt:mat('#9b8363'),stone:mat('#7b8588'),stone2:mat('#938f83'),wall:mat('#978b77'),roof:mat('#394757'),wood:mat('#72523e'),gold:mat('#b99958',.55,.48),iron:mat('#a8bbc0',.75,.3),water:mat('#4a9db0',.15,.17),tree:mat('#3f6f50'),tree2:mat('#5c8851'),dark:mat('#24364c'),skin:mat('#d9ad87'),black:mat('#2b3036'),white:mat('#f4e8ce'),red:mat('#8b4c53'),blue:mat('#527aa8'),glow:new TH.MeshStandardMaterial({color:'#79a8b7',emissive:'#28617d',emissiveIntensity:.32})};
 // Handgemalte, frei erzeugte Texturen: keine externen Assets oder Lizenzen nötig.
 function paintedTexture(base,kind,size=256,repeat=1){const c=document.createElement('canvas');c.width=c.height=size;const ctx=c.getContext('2d');ctx.fillStyle=base;ctx.fillRect(0,0,size,size);const random=rng(size*31+kind.length*791);for(let i=0;i<(kind==='grass'?8000:3800);i++){const x=random()*size,y=random()*size;ctx.fillStyle=random()>.5?'rgba(255,246,193,.12)':'rgba(19,38,26,.16)';const r=.3+random()*2;ctx.fillRect(x,y,r,r)}
 if(kind==='grass'){for(let i=0;i<1200;i++){const x=random()*size,y=random()*size;ctx.strokeStyle=random()>.5?'rgba(201,220,121,.34)':'rgba(27,79,43,.38)';ctx.lineWidth=.5+random();ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+(random()-.5)*4,y-3-random()*7);ctx.stroke()}}
@@ -36,11 +36,11 @@ const rand=rng(83120),decor=[];
 const distant=new TH.Group();scene.add(distant);
 const mountainMats=[mat('#728b89'),mat('#859f9d'),mat('#a4b8b2')];
 for(let layer=0;layer<3;layer++){const count=layer===0?46:34;const ridge=new TH.InstancedMesh(new TH.ConeGeometry(1,1,5),mountainMats[layer],count);ridge.castShadow=false;ridge.receiveShadow=false;const ob=new TH.Object3D();for(let i=0;i<count;i++){const a=(i/count)*Math.PI*2+(layer*.04),dist=245+layer*65;const height=(layer===0?50:70)+(rand()*85);ob.position.set(Math.cos(a)*dist,height*.34-9,Math.sin(a)*dist);ob.rotation.set(0,a+rand()*.7,0);ob.scale.set(28+rand()*38,height,28+rand()*38);ob.updateMatrix();ridge.setMatrixAt(i,ob.matrix)}ridge.instanceMatrix.needsUpdate=true;distant.add(ridge)}
-const clouds=new TH.Group();scene.add(clouds);const cloudMat=new TH.MeshBasicMaterial({color:'#f4efe1',transparent:true,opacity:.29,depthWrite:false});
+const clouds=new TH.Group();scene.add(clouds);const cloudMat=new TH.MeshBasicMaterial({color:'#d4d7d0',transparent:true,opacity:.2,depthWrite:false});
 for(let i=0;i<24;i++){const cloud=new TH.Group();const a=rand()*Math.PI*2,r=110+rand()*170;cloud.position.set(Math.cos(a)*r,62+rand()*42,Math.sin(a)*r);clouds.add(cloud);for(let j=0;j<4;j++){const puff=mesh(cloud,new TH.IcosahedronGeometry(1,1),cloudMat,(j-1.5)*8,rand()*3,rand()*6-3,10+rand()*8,3+rand()*2,5+rand()*4);puff.castShadow=false;puff.receiveShadow=false}}
 
 // Kostenloser dynamischer Tag-Nacht-Zyklus mit Sonne, Mond und Sternenhimmel.
-const daylightSky=new TH.Color('#8db6c7'),twilightSky=new TH.Color('#bc7990'),nightSky=new TH.Color('#101b35');
+const daylightSky=new TH.Color('#718f9e'),twilightSky=new TH.Color('#bc7990'),nightSky=new TH.Color('#101b35');
 const moonMat=new TH.MeshBasicMaterial({color:'#e9e8d5'}),sunDiscMat=new TH.MeshBasicMaterial({color:'#ffe5a2'});
 const sunDisc=mesh(scene,new TH.SphereGeometry(7,20,12),sunDiscMat,0,0,0),moonDisc=mesh(scene,new TH.SphereGeometry(5.2,18,12),moonMat,0,0,0);
 sunDisc.castShadow=false;sunDisc.receiveShadow=false;moonDisc.castShadow=false;moonDisc.receiveShadow=false;
@@ -53,15 +53,15 @@ const moonlightColor=new TH.Color('#91a7d1'),daylightColor=new TH.Color('#fff0cb
 function updateSky(t){const phase=(t*.000012+1.1)%(Math.PI*2),height=Math.sin(phase),day=TH.MathUtils.smoothstep(height,-.17,.32),twilight=1-Math.min(1,Math.abs(height)*2.8);
 scene.background.copy(nightSky).lerp(daylightSky,day).lerp(twilightSky,twilight*.4);scene.fog.color.copy(scene.background);
 // Schritt 3: wärmere Abendsonne, kühler Mondschein und sanftere Schatten.
-sun.intensity=.25+day*2.35;skyLight.intensity=.16+day*.5;
+sun.intensity=.16+day*1.55;skyLight.intensity=.1+day*.27;
 sun.color.copy(moonlightColor).lerp(daylightColor,day).lerp(sunsetColor,twilight*.32);
 sun.position.set(hero.position.x+Math.cos(phase)*85,55+Math.max(0,height)*50,hero.position.z+Math.sin(phase)*65);
 sun.target.position.set(hero.position.x,0,hero.position.z);sun.target.updateMatrixWorld();
-renderer.toneMappingExposure=1.02+day*.2;
+renderer.toneMappingExposure=.72+day*.18;
 sunDisc.position.set(hero.position.x+Math.cos(phase)*330,Math.sin(phase)*255,hero.position.z-230);
 moonDisc.position.set(hero.position.x-Math.cos(phase)*330,-Math.sin(phase)*255,hero.position.z+230);
 sunDisc.visible=height>-.05;moonDisc.visible=height<.1;
-stars.position.set(hero.position.x,0,hero.position.z);stars.material.opacity=Math.max(0,1-day)*.88;cloudMat.opacity=.11+day*.2;
+stars.position.set(hero.position.x,0,hero.position.z);stars.material.opacity=Math.max(0,1-day)*.88;cloudMat.opacity=.07+day*.11;
 const dayLabel=document.getElementById('daycycle');if(dayLabel&&Math.floor(t/1000)!==Math.floor((t-16)/1000))dayLabel.textContent=height>.35?'☀️ Tag':height>-.12?'🌅 Dämmerung':'🌙 Nacht';
 }
 // Wald statt geometrischer Kugelbäume: abgestufte Äste und natürlich geformte Kronen.
@@ -104,7 +104,7 @@ const scar=box(g,pineBark,Math.sin(j*2.3)*.27,1.1+j*.9,Math.cos(j*2.3)*.27,.22,.
 decor.push(g)
 }
 function rock(x,z,s=1){const a=mesh(world,new TH.DodecahedronGeometry(1,0),M.stone,x,.6*s,z,1.5*s,.9*s,1.2*s);a.rotation.y=rand()*6}
-function house(x,z,scale=1,style=0){const g=new TH.Group();g.position.set(x,0,z);g.scale.setScalar(scale);world.add(g);box(g,M.stone2,0,.5,0,10,1,9);box(g,M.wall,0,4.3,0,9.5,7,8.5);const roofMat=style?M.red:M.roof;const left=box(g,roofMat,-2.5,9.3,0,6.8,.85,11.5);left.rotation.z=-.55;const right=box(g,roofMat,2.5,9.3,0,6.8,.85,11.5);right.rotation.z=.55;box(g,M.wood,0,2.5,4.36,2.4,4,.3);for(const xx of [-3,3]){box(g,M.wood,xx,5.1,4.38,1.7,2.3,.25);box(g,M.glow,xx,5.1,4.55,1.1,1.7,.12);box(g,M.wood,xx,5.1,4.7,.12,2,.12);box(g,M.wood,xx,5.1,4.7,1.5,.12,.12)}for(const xx of [-4.3,4.3])for(const zz of [-3.8,3.8])box(g,M.wood,xx,4.3,zz,.5,7.8,.5);return g}
+function house(x,z,scale=1,style=0){const g=new TH.Group();g.position.set(x,0,z);g.scale.setScalar(scale);world.add(g);box(g,M.stone2,0,.5,0,10,1,9);box(g,M.wall,0,4.3,0,9.5,7,8.5);const roofMat=style?M.red:M.roof;const left=box(g,roofMat,-2.5,9.3,0,6.8,.85,11.5);left.rotation.z=-.55;const right=box(g,roofMat,2.5,9.3,0,6.8,.85,11.5);right.rotation.z=.55;box(g,M.wood,0,2.5,4.36,2.4,4,.3);box(g,M.iron,0,2.5,4.57,.16,.25,.1);for(const xx of [-3,3]){box(g,M.wood,xx,5.1,4.38,1.7,2.3,.25);box(g,M.dark,xx,5.1,4.55,1.1,1.7,.12);box(g,M.wood,xx,5.1,4.7,.12,2,.12);box(g,M.wood,xx,5.1,4.7,1.5,.12,.12);box(g,M.wood,xx,5.1,4.72,.11,1.85,.1)}for(const xx of [-4.3,4.3])for(const zz of [-3.8,3.8])box(g,M.wood,xx,4.3,zz,.5,7.8,.5);return g}
 // Schritt 4: Burgzufahrt mit gestaffelten Mauerfüßen und verwitterten Steinlagen.
 const castleApproachMat=mat('#8d9188',.04,.94);
 function castleApproach(){
