@@ -512,7 +512,7 @@ function updateSpells(t,dt){for(let i=spellEffects.length-1;i>=0;i--){const e=sp
 const floatingHits=[];
 function healthBar(m){const g=new TH.Group();g.position.y=m.boss?5.4:4.55;m.mesh.add(g);const bg=new TH.Mesh(new TH.PlaneGeometry(2.3,.3),new TH.MeshBasicMaterial({color:0x130f1a,side:TH.DoubleSide,depthTest:false}));g.add(bg);const fg=new TH.Mesh(new TH.PlaneGeometry(2.16,.17),new TH.MeshBasicMaterial({color:m.boss?0xe18cf0:0xe45a65,side:TH.DoubleSide,depthTest:false}));fg.position.z=.02;g.add(fg);m.bar=fg;m.barGroup=g}
 function hitNumber(m,amount,magic){const canvas=document.createElement('canvas');canvas.width=256;canvas.height=80;const ctx=canvas.getContext('2d');ctx.font='bold 49px Georgia';ctx.textAlign='center';ctx.lineWidth=7;ctx.strokeStyle='#10131b';ctx.strokeText(String(amount),128,57);ctx.fillStyle=magic?'#b5d2ff':'#ffe3a2';ctx.fillText(String(amount),128,57);const tex=new TH.CanvasTexture(canvas),sprite=new TH.Sprite(new TH.SpriteMaterial({map:tex,transparent:true,depthWrite:false}));sprite.scale.set(2.8,.85,1);sprite.position.set(m.mesh.position.x,3.8,m.mesh.position.z);scene.add(sprite);floatingHits.push({sprite,tex,start:performance.now(),x:sprite.position.x,z:sprite.position.z})}
-const mobs=[];function spawnMob(x,z,boss=false){const o=makeCharacter(boss?'boss':'mob');o.position.set(x,0,z);o.scale.setScalar(boss?1.8:1.05);scene.add(o);mobs.push({mesh:o,hp:boss?280:65+state.level*8,max:boss?280:65+state.level*8,boss,alive:true,origin:[x,z],phase:rand()*10});if(typeof decorateEnemy==='function')decorateEnemy(mobs[mobs.length-1]);healthBar(mobs[mobs.length-1])}
+const mobs=[];function spawnMob(x,z,boss=false){const o=makeCharacter(boss?'boss':'mob');o.position.set(x,0,z);o.scale.setScalar(boss?1.8:1.05);scene.add(o);mobs.push({mesh:o,hp:boss?280:65+state.level*8,max:boss?280:65+state.level*8,boss,alive:true,origin:[x,z],phase:rand()*10,nextAttack:0,alert:false});if(typeof decorateEnemy==='function')decorateEnemy(mobs[mobs.length-1]);healthBar(mobs[mobs.length-1])}
 for(const [x,z] of [[-12,18],[16,14],[-17,-6],[20,-12],[-28,6],[32,20],[8,45],[-13,54],[38,62],[62,50]])spawnMob(x,z);spawnMob(70,45,true);
 // Kostenlose, eigenständig erzeugte Gegner-Typen mit sichtbaren Unterschieden.
 function decorateEnemy(m){const g=m.mesh,body=g.userData.body,armor=g.userData.armor;
@@ -678,8 +678,35 @@ arm.rotation.z=smoothJoint(arm.rotation.z,(j?-.09:.09)*strength,dt,9);
 arm.userData.forearm.rotation.x=smoothJoint(arm.userData.forearm.rotation.x,-.14-Math.max(0,cycle)*.24*strength,dt,11);
 }
 }
+function updateEnemyAI(t,dt){
+if(opened)return;
+for(const m of mobs){
+if(!m.alive||!!m.dungeon!==run.active)continue;
+const pos=m.mesh.position,dx=hero.position.x-pos.x,dz=hero.position.z-pos.z,dist=Math.hypot(dx,dz);
+const pursuit=m.boss?26:17,reach=m.boss?3.8:2.4;
+const ox=m.origin[0]-pos.x,oz=m.origin[1]-pos.z,home=Math.hypot(ox,oz);
+let vx=0,vz=0;
+if(dist<pursuit&&(m.dungeon||home<28)){m.alert=true;if(dist>reach){vx=dx/dist;vz=dz/dist}}
+else if(!m.dungeon&&home>1){m.alert=false;vx=ox/home;vz=oz/home}
+else m.alert=false;
+const speed=m.boss?2.7:3.3;
+if(vx||vz){const step=Math.min(dt,.05)*speed;pos.x+=vx*step;pos.z+=vz*step;
+if(m.dungeon){pos.x=TH.MathUtils.clamp(pos.x,103,167);pos.z=TH.MathUtils.clamp(pos.z,98,162)}
+const angle=Math.atan2(vx,vz),turn=Math.atan2(Math.sin(angle-m.mesh.rotation.y),Math.cos(angle-m.mesh.rotation.y));
+m.mesh.rotation.y+=turn*(1-Math.exp(-8*dt))}
+if(m.alert&&dist<=reach&&t>=m.nextAttack){
+m.nextAttack=t+(m.boss?2300:1750);
+const damage=Math.max(1,(m.boss?17:9)-Math.floor(stats().defense/15));
+state.hp=Math.max(1,state.hp-damage);hud();
+spellBurst(pos.x,2,pos.z,false);
+}
+const motion=m.mesh.userData;
+if(motion.legs)for(let j=0;j<2;j++){const gait=(vx||vz)?Math.sin(t*.009+m.phase+j*Math.PI)*.35:0;motion.legs[j].rotation.x=TH.MathUtils.damp(motion.legs[j].rotation.x,gait,9,dt)}
+if(motion.arms)for(let j=0;j<2;j++){const swing=(vx||vz)?Math.sin(t*.009+m.phase+j*Math.PI)*-.22:0;motion.arms[j].rotation.x=TH.MathUtils.damp(motion.arms[j].rotation.x,swing,9,dt)}
+}
+}
 function animate(t){requestAnimationFrame(animate);updateSky(t);for(let i=floatingHits.length-1;i>=0;i--){const f=floatingHits[i],p=(t-f.start)/850;if(p>=1){scene.remove(f.sprite);f.sprite.material.dispose();f.tex.dispose();floatingHits.splice(i,1)}else{f.sprite.position.set(f.x,3.8+p*2.4,f.z);f.sprite.material.opacity=1-p}}
-for(const m of mobs)if(m.alive&&m.barGroup){m.barGroup.quaternion.copy(camera.quaternion);m.barGroup.visible=hero.position.distanceTo(m.mesh.position)<35}if(t-minimapTick>140){minimapTick=t;refreshMMO()}const dt=Math.min(.05,(t-(animate.last||t))/1000);animate.last=t;move(dt,t);updateSpells(t,dt);dungeonBossMechanics(t);if(run.active&&state.hp<=1){state.hp=stats().maxhp;resetDungeon('💀 Dungeon gescheitert. Du bist wieder am Portal.');hud()}for(const m of mobs)if(m.alive){if(m.aura)m.aura.rotation.z=t*.0007;m.mesh.userData.body.position.y=Math.sin(t*.0015+m.phase)*.07;if(!opened&&hero.position.distanceTo(m.mesh.position)<2.4&&Math.floor(t/1700)!==Math.floor((t-dt*1000)/1700)){state.hp=Math.max(1,state.hp-Math.max(1,8-Math.floor(stats().defense/15)));if(state.hp<=1){state.hp=stats().maxhp;if(run.active)resetDungeon('💀 Dungeon gescheitert. Du bist wieder am Portal.');else{hero.position.set(0,0,25);state.pos=hero.position.toArray();toast('💀 Du erwachst in Sonnenhain.');save()}}hud()}}for(const n of npcs)n.marker.position.y=5.7+Math.sin(t*.003+n.x)*.3;for(const chest of treasureChests)if(!chest.opened){chest.glow.position.y=1.53+Math.sin(t*.003+chest.id)*.18;chest.glow.rotation.y=t*.001}portalGlow.material.opacity=.4+Math.sin(t*.002)*.18;
+for(const m of mobs)if(m.alive&&m.barGroup){m.barGroup.quaternion.copy(camera.quaternion);m.barGroup.visible=hero.position.distanceTo(m.mesh.position)<35}if(t-minimapTick>140){minimapTick=t;refreshMMO()}const dt=Math.min(.05,(t-(animate.last||t))/1000);animate.last=t;move(dt,t);updateSpells(t,dt);updateEnemyAI(t,dt);dungeonBossMechanics(t);if(state.hp<=1){state.hp=stats().maxhp;if(run.active)resetDungeon('💀 Dungeon gescheitert. Du bist wieder am Portal.');else{hero.position.set(0,0,25);state.pos=hero.position.toArray();save();toast('💀 Du erwachst in Sonnenhain.')}hud()}for(const m of mobs)if(m.alive){if(m.aura)m.aura.rotation.z=t*.0007;m.mesh.userData.body.position.y=Math.sin(t*.0015+m.phase)*.07;}for(const n of npcs)n.marker.position.y=5.7+Math.sin(t*.003+n.x)*.3;for(const chest of treasureChests)if(!chest.opened){chest.glow.position.y=1.53+Math.sin(t*.003+chest.id)*.18;chest.glow.rotation.y=t*.001}portalGlow.material.opacity=.4+Math.sin(t*.002)*.18;
 if(hero.userData.rune)hero.userData.rune.rotation.z=Math.sin(t*.0016)*.18;hero.userData.capeMesh.rotation.y=Math.sin(t*.003)*.08;hero.userData.capeMesh.rotation.x=TH.MathUtils.damp(hero.userData.capeMesh.rotation.x,-.14-Math.min(1,locomotion.speed/5)*.18,6,dt);
 const attackProgress=Math.max(0,1-(attackAt-t)/550);
 if(t<attackAt&&attackProgress>.01&&attackProgress<1){hero.userData.arms[0].rotation.x=-1.3+Math.sin(attackProgress*Math.PI)*-.95;hero.userData.arms[0].rotation.z=-.35;hero.userData.body.rotation.y=Math.sin(attackProgress*Math.PI)*-.14}else{hero.userData.body.rotation.y=TH.MathUtils.lerp(hero.userData.body.rotation.y,0,Math.min(1,dt*9))}if(hero.userData.wingHalo)hero.userData.wingHalo.rotation.z=t*.00035;if(hero.userData.swordAura)hero.userData.swordAura.rotation.y=t*.001;
