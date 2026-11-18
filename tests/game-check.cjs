@@ -44,3 +44,6 @@ test('Equipment rebuild disposes temporary GPU resources',()=>{for(const token o
 test('Academy lessons, progress and graduation are present',()=>{for(const token of ["const academyLessons=","function academyLesson(index)","function academyCase(i)","function academyProgress()","state.quests.academyComplete=true","academyProgress()===academyLessons.length"])assert.ok(js.includes(token),token)});
 
 test('Dungeon has three boss phases, warning circles, reset and persistent clears',()=>{for(const token of ["function clearDungeonTelegraph()","function resetDungeon(message)","function dungeonBossMechanics(t)","boss.bossPhase!==phase","phase===3?5.8","state.quests.dungeonClears=","dungeonBossMechanics(t)"])assert.ok(js.includes(token),token)});
+
+test('Humanoid hairstyle and articulated ankle meshes are present',()=>{for(const token of ["const temple=mesh(hairRoot","const back=mesh(hairRoot","leg.userData.foot=foot","leg.userData.foot.rotation.x=smoothJoint"])assert.ok(js.includes(token),token)});
+test('Layered armor detail survives equipment rebuild',()=>{for(const token of ["Dreischichtiger Harnisch","const lamella=box(armor","const collar=mesh(armor","protectedGearMaterials.has(material)"])assert.ok(js.includes(token),token)});
