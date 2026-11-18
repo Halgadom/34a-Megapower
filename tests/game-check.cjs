@@ -47,3 +47,5 @@ test('Dungeon has three boss phases, warning circles, reset and persistent clear
 
 test('Humanoid hairstyle and articulated ankle meshes are present',()=>{for(const token of ["const temple=mesh(hairRoot","const back=mesh(hairRoot","leg.userData.foot=foot","leg.userData.foot.rotation.x=smoothJoint"])assert.ok(js.includes(token),token)});
 test('Layered armor detail survives equipment rebuild',()=>{for(const token of ["Dreischichtiger Harnisch","const lamella=box(armor","const collar=mesh(armor","protectedGearMaterials.has(material)"])assert.ok(js.includes(token),token)});
+
+test('Dungeon retry removes stale enemies and saves respawn position',()=>{for(const token of ["for(let i=mobs.length-1;i>=0;i--)","mobs.splice(i,1)","if(run.active)resetDungeon(","state.pos=hero.position.toArray();save()"])assert.ok(js.includes(token),token)});
