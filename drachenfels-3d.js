@@ -543,7 +543,7 @@ for(const x of [-35,35])box(arena,M.stone2,x,4,0,2,8,72);
 for(const z of [-35,35])box(arena,M.stone2,0,4,z,72,8,2);
 for(const x of [-29,29])for(const z of [-29,29]){cyl(arena,M.stone2,x,5,z,2,10);cone(arena,M.roof,x,11,z,3,4)}
 const run={active:false,wave:0,remaining:0,telegraph:null,nextStrike:0};
-function dungeonWave(){run.wave++;run.remaining=3+run.wave;for(let i=0;i<run.remaining;i++){const a=i*Math.PI*2/run.remaining;spawnMob(135+Math.cos(a)*22,130+Math.sin(a)*22,run.wave===3&&i===0);const m=mobs[mobs.length-1];m.dungeon=true;m.hp+=run.wave*65;m.max=m.hp}toast('🏰 Dungeonwelle '+run.wave+'/3 beginnt!')}
+function dungeonWave(){run.wave++;run.remaining=3+run.wave;for(let i=0;i<run.remaining;i++){const a=i*Math.PI*2/run.remaining;const radius=run.wave===3?13:12;spawnMob(135+Math.cos(a)*radius,130+Math.sin(a)*radius,run.wave===3&&i===0);const m=mobs[mobs.length-1];m.dungeon=true;m.hp+=run.wave*65;m.max=m.hp;m.nextAttack=performance.now()+1200}toast('🏰 Dungeonwelle '+run.wave+'/3 beginnt!')}
 function clearDungeonTelegraph(){if(run.telegraph){scene.remove(run.telegraph.mesh);run.telegraph.mesh.geometry.dispose();run.telegraph.mesh.material.dispose();run.telegraph=null}}
 function clearDungeonEnemies(){for(let i=mobs.length-1;i>=0;i--){const m=mobs[i];if(!m.dungeon)continue;scene.remove(m.mesh);mobs.splice(i,1)}}
 function returnFromDungeon(){clearDungeonTelegraph();clearDungeonEnemies();run.active=false;run.wave=0;run.remaining=0;run.nextStrike=0;hero.position.set(65,0,38);state.pos=hero.position.toArray();save()}
@@ -685,7 +685,7 @@ if(opened||!dt)return;
 for(const m of mobs){
 if(!m.alive||!!m.dungeon!==run.active)continue;
 const pos=m.mesh.position,dx=hero.position.x-pos.x,dz=hero.position.z-pos.z,dist=Math.hypot(dx,dz);
-const pursuit=m.boss?26:17,reach=m.boss?3.8:2.4;
+const pursuit=m.dungeon?40:m.boss?26:17,reach=m.boss?3.8:2.4;
 const ox=m.origin[0]-pos.x,oz=m.origin[1]-pos.z,home=Math.hypot(ox,oz);
 let vx=0,vz=0;
 if(dist<pursuit&&(m.dungeon||home<28)){m.alert=true;if(dist>reach){vx=dx/dist;vz=dz/dist}}
