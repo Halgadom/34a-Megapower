@@ -16,6 +16,12 @@ function addTree(x,z,scale){const group=new THREE.Group();group.position.set(x,0
 for(let j=0;j<5;j++){const y=h*(.5+j*.13),radius=3.7-j*.52;const crown=new THREE.Mesh(new THREE.ConeGeometry(radius,3.8,9,2),forestColors[j%4]);crown.position.y=y+1.5;crown.rotation.y=j*.7;crown.castShadow=true;group.add(crown)}
 for(let j=0;j<7;j++){const a=j*2.4,leaf=new THREE.Mesh(new THREE.IcosahedronGeometry(rng(.9,1.6),1),forestColors[(j+2)%4]);leaf.position.set(Math.cos(a)*1.3,h*.68+j*.22,Math.sin(a)*1.3);leaf.scale.set(1.3,.7,1.3);group.add(leaf)}}
 
+
+// Forest-floor layering: fallen logs, ferns and mushroom clusters.
+const fernLeaf=new THREE.MeshStandardMaterial({color:0x3c8056,side:THREE.DoubleSide,roughness:1});
+for(let k=0;k<135;k++){const x=rng(-110,110),z=rng(-110,110);if(Math.hypot(x,z)<12)continue;const fern=new THREE.Group();fern.position.set(x,.06,z);fern.rotation.y=rng(0,6.28);fern.scale.setScalar(rng(.6,1.5));props.add(fern);for(let i=0;i<7;i++){const blade=new THREE.Mesh(new THREE.ConeGeometry(.18,.95,4),fernLeaf);blade.position.set(Math.cos(i*6.28/7)*.33,.4,Math.sin(i*6.28/7)*.33);blade.rotation.z=Math.cos(i*6.28/7)*.75;blade.rotation.x=Math.sin(i*6.28/7)*.75;fern.add(blade)}}
+for(let k=0;k<32;k++){const x=rng(-90,90),z=rng(-90,90);if(Math.hypot(x,z)<14)continue;const log=new THREE.Mesh(new THREE.CylinderGeometry(.2,.3,rng(2,5),8),bark);log.position.set(x,.24,z);log.rotation.z=Math.PI/2;log.rotation.y=rng(0,6.28);props.add(log)}
+
 for(let i=0;i<165;i++){const x=rng(-120,120),z=rng(-120,120);if(Math.hypot(x,z)<14||Math.abs(x)<7&&z>-34&&z<10)continue;addTree(x,z,rng(.65,1.4))}
 for(let i=0;i<100;i++){const x=rng(-100,100),z=rng(-100,100);if(Math.hypot(x,z)<10)continue;const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(rng(.4,1.65),1),stone);rock.position.set(x,.2,z);rock.scale.set(1,.5,rng(.7,1.5));rock.castShadow=true;props.add(rock)}
 const grassGeometry=new THREE.ConeGeometry(.12,.7,3),grassMaterials=[mat(0x397f4d),mat(0x52935a),mat(0x245c3d)];for(let c=0;c<3;c++){const inst=new THREE.InstancedMesh(grassGeometry,grassMaterials[c],1800),dummy=new THREE.Object3D();for(let i=0;i<1800;i++){dummy.position.set(rng(-100,100),.25,rng(-100,100));dummy.rotation.set(0,rng(0,6.28),rng(-.25,.25));dummy.scale.setScalar(rng(.5,1.3));dummy.updateMatrix();inst.setMatrixAt(i,dummy.matrix)}inst.instanceMatrix.needsUpdate=true;props.add(inst)}
@@ -146,8 +152,19 @@ part(new THREE.SphereGeometry(.3,14,12),petMat,0,.49,0,companion);part(new THREE
 for(const side of [-1,1]){part(new THREE.ConeGeometry(.16,.5,6),petMat,side*.19,1.12,-.06,companion).rotation.z=side*-.3;part(new THREE.SphereGeometry(.06,8,8),eyeWhite,side*.12,.89,-.28,companion)}
 const wingL=part(new THREE.ConeGeometry(.26,.7,3),petMat,-.39,.58,.16,companion),wingR=part(new THREE.ConeGeometry(.26,.7,3),petMat,.39,.58,.16,companion);wingL.rotation.z=-.7;wingR.rotation.z=.7;
 const magicDots=[];for(let i=0;i<20;i++){const m=part(new THREE.SphereGeometry(.025+Math.random()*.035,6,5),new THREE.MeshBasicMaterial({color:i%3===0?0xffd36a:0x75d6fc,transparent:true,opacity:.7}),0,0,0,hero);magicDots.push({m,phase:Math.random()*Math.PI*2,r:1.0+Math.random()*.3})}
+
+// Procedural painted materials: generated locally, without external asset licenses.
+function paintedTexture(base, fleck, streak, repeat=1){const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');x.fillStyle=base;x.fillRect(0,0,256,256);let n=1447;const rand=()=>((n=(n*1664525+1013904223)>>>0)/4294967296);for(let i=0;i<2200;i++){const px=rand()*256,py=rand()*256;x.fillStyle=i%4===0?streak:fleck;x.globalAlpha=.08+rand()*.25;x.fillRect(px,py,1+rand()*13,1+rand()*3)}x.globalAlpha=1;const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(repeat,repeat);t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t}
+const wolfFur=new THREE.MeshStandardMaterial({map:paintedTexture('#4c4651','#aaa0a4','#1b1a29'),roughness:1});
+const wolfChest=new THREE.MeshStandardMaterial({map:paintedTexture('#837e87','#d1c4b9','#504752'),roughness:1});
+const wolfDark=new THREE.MeshStandardMaterial({map:paintedTexture('#272331','#655c6b','#11101a'),roughness:1});
+const wolfEye=new THREE.MeshStandardMaterial({color:0xff518a,emissive:0xff236b,emissiveIntensity:2.2,roughness:.15});
+const villageWall=new THREE.MeshStandardMaterial({map:paintedTexture('#ab977d','#ded0ad','#685b4c',2),roughness:1});
+const villageRoof=new THREE.MeshStandardMaterial({map:paintedTexture('#493a49','#967080','#211c2a',2),roughness:.92});
+const mossRock=new THREE.MeshStandardMaterial({map:paintedTexture('#6b7472','#8f9c86','#334d42'),roughness:.98});
+
 const enemies=[];function spawn(){const angle=rng(0,Math.PI*2),dist=rng(16,37),e=new THREE.Group();e.position.set(hero.position.x+Math.cos(angle)*dist,0,hero.position.z+Math.sin(angle)*dist);
-const fur=mat(0x4b4654),furLight=mat(0x827d8c),furDark=mat(0x252431),eye=mat(0xff3c75,.8);
+const fur=wolfFur,furLight=wolfChest,furDark=wolfDark,eye=wolfEye;
 const body=part(new THREE.SphereGeometry(.8,16,12),fur,0,1.13,0,e);body.scale.set(.8,.75,1.55);
 const chest=part(new THREE.SphereGeometry(.65,14,10),furLight,0,1.3,.65,e);chest.scale.set(.72,.95,.6);
 const neck=part(new THREE.SphereGeometry(.54,14,10),fur,0,1.65,.8,e);neck.rotation.x=-.4;
@@ -179,8 +196,16 @@ if(!progress||!progress.quests)progress={level:1,xp:0,gold:25,points:0,power:0,v
 const quests=[{id:'wolves',name:'Schattenwölfe',goal:5,exp:90,gold:40},{id:'crystals',name:'Arkankristalle',goal:4,exp:120,gold:55},{id:'boss',name:'Ruinenwächter',goal:1,exp:240,gold:100}];
 const crystals=[];for(let i=0;i<12;i++){const x=rng(-65,65),z=rng(-85,-30),c=new THREE.Mesh(new THREE.OctahedronGeometry(.5),crystalMaterial);c.position.set(x,.75,z);c.scale.y=1.7;scene.add(c);crystals.push(c)}
 const village=new THREE.Group();village.position.set(26,0,8);scene.add(village);
-const wallMat=mat(0xa38b71),roofMat=mat(0x453b55);
+const wallMat=villageWall,roofMat=villageRoof;
 for(const [x,z] of [[-9,-5],[0,-8],[9,-4],[-7,8],[8,9]]){const house=new THREE.Group();house.position.set(x,0,z);village.add(house);const walls=new THREE.Mesh(new THREE.BoxGeometry(6,4,5),wallMat);walls.position.y=2;house.add(walls);const roof=new THREE.Mesh(new THREE.ConeGeometry(4.6,3,4),roofMat);roof.position.y=5.4;roof.rotation.y=Math.PI/4;house.add(roof);const door=new THREE.Mesh(new THREE.BoxGeometry(1.3,2,.12),bark);door.position.set(0,1,2.56);house.add(door)}
+
+// Window frames, warm interiors, shingles and climbing vines give the settlement readable detail.
+for(const building of village.children){if(!building.isGroup)continue;
+for(const side of [-1,1]){const frame=new THREE.Mesh(new THREE.BoxGeometry(1.25,1.35,.18),bark);frame.position.set(side*1.95,2.45,2.57);building.add(frame);const glass=new THREE.Mesh(new THREE.PlaneGeometry(.91,1.02),new THREE.MeshStandardMaterial({color:0xffd890,emissive:0xffae54,emissiveIntensity:.6}));glass.position.set(side*1.95,2.45,2.67);building.add(glass);const cross=new THREE.Mesh(new THREE.BoxGeometry(.11,1.12,.11),bark);cross.position.set(side*1.95,2.45,2.73);building.add(cross)}
+for(let k=0;k<12;k++){const shingle=new THREE.Mesh(new THREE.BoxGeometry(.55,.07,1.6),villageRoof);shingle.position.set(-2.2+(k%6)*.87,4.4+Math.floor(k/6)*.43,-1.4+Math.floor(k/6)*2.7);shingle.rotation.z=(k%2?-.12:.12);building.add(shingle)}
+for(let k=0;k<5;k++){const vine=new THREE.Mesh(new THREE.IcosahedronGeometry(.22,1),forestColors[k%4]);vine.position.set(-2.7,1+k*.55,2.57);building.add(vine)}
+}
+
 const npcList=[];for(const [name,x,z,color] of [['Hauptmann Arin',17,6,0x355d9e],['Waldhüterin Lyra',31,17,0x42734c],['Schmied Borin',33,0,0x935c35]]){const npc=new THREE.Group();npc.position.set(x,0,z);scene.add(npc);const body=new THREE.Mesh(new THREE.CylinderGeometry(.4,.35,1.1,10),mat(color));body.position.y=1.45;npc.add(body);const face=new THREE.Mesh(new THREE.SphereGeometry(.32,12,10),skin);face.position.y=2.3;npc.add(face);npcList.push({name,npc})}
 progress.armor=progress.armor||'Reiserüstung';progress.bossKills=progress.bossKills||0;
 function persistRpg(){try{localStorage.setItem(RPG_KEY,JSON.stringify(progress))}catch{}}
