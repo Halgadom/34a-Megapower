@@ -281,7 +281,7 @@ function bossThemeWings(item){
  const mirror='<g transform="translate(120 0) scale(-1 1)">';
  const left='<path d="'+shape+'" fill="'+d+'" stroke="'+c+'" stroke-width="3"/><path d="M49 128 Q29 125 18 112 M49 144 Q24 153 13 171 M42 160 L27 186" fill="none" stroke="'+c+'" stroke-width="2" opacity=".85"/>';
  const ornaments=t==='steam'?'<circle cx="21" cy="143" r="11" fill="none" stroke="'+c+'" stroke-width="3" class="boss-wing-gear"/>':t==='angel'?'<path d="M12 116 L39 151 M9 139 L36 162 M16 169 L43 151" stroke="#fff" stroke-width="4" opacity=".75"/>':t==='plague'?'<circle cx="20" cy="144" r="7" fill="'+c+'" opacity=".7" class="boss-wing-pulse"/>':t==='necro'?'<path d="M18 111 L35 146 L13 184" fill="none" stroke="#b7f9ff" stroke-width="3"/>':t==='ocean'?'<circle cx="18" cy="123" r="5" fill="#e8ffff" class="boss-wing-pulse"/>':'<path d="M13 116 L42 154 L20 182" stroke="#ffdd88" stroke-width="3" fill="none"/>';
- const half='<g class="boss-wing-flap">'+left+ornaments+'</g>';
+ const half='<g class="boss-wing-flap" transform="translate(53 137) scale(1.14) translate(-53 -137)">'+left+ornaments+'</g>';
  const sparks=Array.from({length:7},(_,i)=>'<circle class="boss-wing-spark" cx="'+(12+i*16)+'" cy="'+(94+(i%4)*23)+'" r="'+(1.4+i%3)+'" fill="'+c+'" style="animation-delay:-'+(i*.27).toFixed(2)+'s"/>').join('');
  return '<g class="boss-wings boss-wings-'+t+'" style="--boss-wing-color:'+c+'"><g class="boss-wing-left">'+half+'</g><g class="boss-wing-right">'+mirror+half+'</g></g><g class="boss-wing-particles">'+sparks+'</g><path d="M52 116 Q60 110 68 116 L70 139 L60 151 L50 139Z" fill="'+d+'" stroke="'+c+'" stroke-width="3"/>';
 }
