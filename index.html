@@ -305,7 +305,7 @@ function bossArmorSyncInventory(p){
  }
  for(const part of BOSS_ARMOR_PARTS){
   const slot=bossArmorGearSlot(part.slot),id=p.bossArmorEquipped[part.slot],gearId=id?'boss_gear_'+id:null;
-  if(id&&p.dragonGear.some(x=>x.id===gearId)&&!p.dragonEquipped[slot])p.dragonEquipped[slot]=gearId;
+  if(id&&p.dragonGear.some(x=>x.id===gearId)&&p.dragonEquipped[slot]!==gearId&&!(p.dragonGear.find(x=>x.id===p.dragonEquipped[slot])?.bossShopId))p.dragonEquipped[slot]=gearId;
   const equipped=p.dragonGear.find(x=>x.id===p.dragonEquipped[slot]);
   if(equipped?.bossShopId)p.bossArmorEquipped[part.slot]=equipped.bossShopId;
   else delete p.bossArmorEquipped[part.slot];
